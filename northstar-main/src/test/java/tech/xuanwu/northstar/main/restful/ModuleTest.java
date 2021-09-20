@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestMongoUtils;
+import tech.xuanwu.northstar.common.constant.ReturnCode;
 import tech.xuanwu.northstar.common.model.GatewayDescription;
 import tech.xuanwu.northstar.domain.GatewayConnection;
 import tech.xuanwu.northstar.gateway.api.TradeGateway;
@@ -28,8 +29,11 @@ import tech.xuanwu.northstar.main.manager.GatewayAndConnectionManager;
 import tech.xuanwu.northstar.main.restful.ModuleController;
 import tech.xuanwu.northstar.strategy.common.constants.ModuleType;
 import tech.xuanwu.northstar.strategy.common.model.ModuleInfo;
+import tech.xuanwu.northstar.strategy.common.model.ModulePosition;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentAndParamsPair;
 import tech.xuanwu.northstar.strategy.common.model.meta.ComponentMetaInfo;
+import xyz.redtorch.pb.CoreEnum.PositionDirectionEnum;
+import xyz.redtorch.pb.CoreField.GatewaySettingField;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NorthstarApplication.class, value="spring.profiles.active=test")
@@ -83,7 +87,9 @@ public class ModuleTest {
 		when(gwDes.getBindedMktGatewayId()).thenReturn("testGw");
 		when(conn.getGwDescription()).thenReturn(gwDes);
 		when(gatewayConnMgr.getGatewayConnectionById("testGateway")).thenReturn(conn);
-		when(gatewayConnMgr.getGatewayById("testGateway")).thenReturn(mock(TradeGateway.class));
+		TradeGateway gateway = mock(TradeGateway.class);
+		when(gateway.getGatewaySetting()).thenReturn(GatewaySettingField.newBuilder().build());
+		when(gatewayConnMgr.getGatewayById("testGateway")).thenReturn(gateway);
 		ComponentMetaInfo dealer = ctrlr.getRegisteredDealers().getData().stream().filter(c -> c.getName().equals("示例交易策略")).findAny().get();
 		ComponentMetaInfo signalPolicy = ctrlr.getRegisteredSignalPolicies().getData().stream().filter(c -> c.getName().equals("示例策略")).findAny().get();
 		ComponentAndParamsPair signalPolicyMeta = ComponentAndParamsPair.builder()
@@ -148,6 +154,52 @@ public class ModuleTest {
 		assertThat(ctrlr.getAllModules().getData()).isNotNull();
 	}
 	
-	// 查询模组历史
+	// 查询模组引用数据
+	@Test
+	public void shouldGetModuleDataRef() throws Exception {
+		shouldSuccessfullyCreate();
+		assertThat(ctrlr.getModuleDataRef("testModule").getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	
+	@Test
+	public void shouldGetModuleInfo() throws Exception {
+		shouldSuccessfullyCreate();
+		assertThat(ctrlr.getModuleRealTimeInfo("testModule").getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldCreateModulePosition() throws Exception {
+		shouldSuccessfullyCreate();
+		ModulePosition position = ModulePosition.builder()
+				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(1234)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Long)
+				.build();
+		assertThat(ctrlr.createPosition("testModule", position).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldUpdateModulePosition() throws Exception {
+		shouldCreateModulePosition();
+		ModulePosition position = ModulePosition.builder()
+				.unifiedSymbol("rb2210@SHFE@FUTURES")
+				.multiplier(10)
+				.openTime(System.currentTimeMillis())
+				.openPrice(2000)
+				.openTradingDay("20210609")
+				.positionDir(PositionDirectionEnum.PD_Long)
+				.build();
+		assertThat(ctrlr.updatePosition("testModule", position).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
+	
+	@Test
+	public void shouldRemoveModulePosition() throws Exception {
+		shouldCreateModulePosition();
+		assertThat(ctrlr.removePosition("testModule", "rb2210@SHFE@FUTURES", PositionDirectionEnum.PD_Long).getStatus()).isEqualTo(ReturnCode.SUCCESS);
+	}
 	
 }
