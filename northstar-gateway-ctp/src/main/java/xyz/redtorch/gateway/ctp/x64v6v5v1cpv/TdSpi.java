@@ -195,8 +195,8 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		this.logInfo = "交易网关ID-[" + this.gatewayId + "] [→] ";
 		logger.info("当前TdApi版本号：{}", CThostFtdcTraderApi.GetApiVersion());
 	}
-	
-	
+
+
 	private CThostFtdcTraderApi cThostFtdcTraderApi;
 
 	private int connectionStatus = CONNECTION_STATUS_DISCONNECTED; // 避免重复调用
@@ -271,12 +271,12 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			logger.warn("{}交易接口已经连接或正在连接，不再重复连接", logInfo);
 			return;
 		}
-		
+
 		if (connectionStatus == CONNECTION_STATUS_CONNECTED) {
 			reqAuth();
 			return;
 		}
-		
+
 		connectionStatus = CONNECTION_STATUS_CONNECTING;
 		loginStatus = false;
 		instrumentQueried = false;
@@ -341,7 +341,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		new Thread() {
 			public void run() {
 				try {
-					Thread.sleep(15 * 1000);
+					Thread.sleep(30 * 1000);
 					if (!(isConnected() && investorNameQueried && instrumentQueried)) {
 						logger.error("{}交易接口连接超时,尝试断开", logInfo);
 						gatewayAdapter.disconnect();
@@ -701,11 +701,11 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			logger.warn("{}交易接口前置机已连接", logInfo);
 			// 修改前置机连接状态
 			connectionStatus = CONNECTION_STATUS_CONNECTED;
-			
+
 			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.CONNECTED, gatewayId);
-			
+
 			reqAuth();
-			
+
 		} catch (Throwable t) {
 			logger.error("{}OnFrontConnected Exception", logInfo, t);
 		}
@@ -716,10 +716,10 @@ public class TdSpi extends CThostFtdcTraderSpi {
 		try {
 			logger.warn("{}交易接口前置机已断开, 原因:{}", logInfo, nReason);
 			gatewayAdapter.disconnect();
-			
+
 			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.DISCONNECTED, gatewayId);
 			gatewayAdapter.getEventEngine().emitEvent(NorthstarEventType.LOGGED_OUT, gatewayId);
-			
+
 		} catch (Throwable t) {
 			logger.error("{}OnFrontDisconnected Exception", logInfo, t);
 		}
@@ -825,7 +825,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 					reqUserLoginField.setUserID(this.userId);
 					reqUserLoginField.setPassword(this.password);
 					cThostFtdcTraderApi.ReqUserLogin(reqUserLoginField, reqId.incrementAndGet());
-					
+
 				} else {
 
 					logger.error("{}交易接口客户端验证失败 错误ID:{},错误信息:{}", logInfo, pRspInfo.getErrorID(), pRspInfo.getErrorMsg());
@@ -1364,7 +1364,7 @@ public class TdSpi extends CThostFtdcTraderSpi {
 			gatewayAdapter.contractMap.put(contractBuilder.getSymbol(), contract);
 			gatewayAdapter.registry.register(new NormalContract(contract, GatewayType.CTP_SIM, System.currentTimeMillis()));
 			if (bIsLast) {
-				
+
 				logger.warn("{}交易接口合约信息获取完成!共计{}条", logInfo, gatewayAdapter.contractMap.size());
 				instrumentQueried = true;
 				this.startIntervalQuery();
