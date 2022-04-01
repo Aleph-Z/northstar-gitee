@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    id="gatewayForm"
     :title="isUpdateMode ? '修改' : '新增'"
     :visible.sync="dialogVisible"
     width="768px"
@@ -37,13 +38,14 @@
         <el-col :span="8">
           <el-form-item :label="`${typeLabel}类型`" prop="gatewayType">
             <el-select
+              id="gatewayTypeOptions"
               v-model="form.gatewayType"
               placeholder="未知"
               @change="onChooseGatewayType"
               :disabled="isUpdateMode"
             >
               <el-option label="CTP" value="CTP"></el-option>
-              <el-option label="CTP_SIM" value="CTP_SIM"></el-option>
+              <el-option v-if="$route.query.superuser" label="CTP_SIM" value="CTP_SIM"></el-option>
               <el-option label="SIM" value="SIM"></el-option>
               <!-- <el-option label="IB网关" value="beijing"></el-option> -->
             </el-select>
@@ -100,12 +102,13 @@
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
       <el-button
+        id="gatewaySettings"
         type="primary"
         @click="gatewaySettingConfig"
         :disabled="!form.gatewayType || (gatewayUsage !== 'TRADE' && form.gatewayType === 'SIM')"
         >{{ typeLabel }}配置</el-button
       >
-      <el-button type="primary" @click="saveGateway">保 存</el-button>
+      <el-button id="saveGatewaySettings" type="primary" @click="saveGateway">保 存</el-button>
     </div>
   </el-dialog>
 </template>
