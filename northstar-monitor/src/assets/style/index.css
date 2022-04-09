@@ -10,6 +10,10 @@
   margin-bottom: 10px;
 }
 
+.mt-10{
+  margin-top: 10px;
+}
+
 .ml-30{
   margin-left: 30px;
 }
@@ -24,4 +28,15 @@
 
 .pb-20{
   padding-bottom: 20px;
+}
+
+.flex{
+  display: flex;
+}
+
+.align-center{
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 }
