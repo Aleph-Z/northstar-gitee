@@ -302,6 +302,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @param gatewayType
 	 * @return
 	 */
+	@Deprecated
 	public List<ContractDefinition> contractDefinitions(GatewayType gatewayType){
 		return contractMgr.getAllContractDefinitions().stream()
 				.filter(def -> def.getGatewayType() == gatewayType)
@@ -313,6 +314,7 @@ public class GatewayService implements InitializingBean, ApplicationContextAware
 	 * @param gatewayType
 	 * @return
 	 */
+	@Deprecated
 	public List<byte[]> getSubscribedContracts(String gatewayId){
 		Map<String, GatewayDescription> resultMap = gatewayRepo.findAll().stream().collect(Collectors.toMap(GatewayDescription::getGatewayId, item -> item));
 		GatewayDescription gd = resultMap.get(gatewayId);

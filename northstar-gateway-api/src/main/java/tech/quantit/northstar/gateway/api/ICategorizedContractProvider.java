@@ -9,8 +9,8 @@ public interface ICategorizedContractProvider {
 
 	String nameOfCategory();
 	
-	List<ContractDefinition> loadContractDefinition();
+	List<ContractDefinition> loadContractDefinitions();
 	
-	List<ContractField> loadContract();
+	List<ContractField> loadContracts();
 	
 }

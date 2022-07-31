@@ -28,7 +28,7 @@ public class CtpFutureContractProvider implements ICategorizedContractProvider, 
 	}
 
 	@Override
-	public List<ContractDefinition> loadContractDefinition() {
+	public List<ContractDefinition> loadContractDefinitions() {
 		return contractMgr.getAllContractDefinitions()
 				.stream()
 				.filter(item -> item.getGatewayType() == GatewayType.CTP && item.getProductClass() == ProductClassEnum.FUTURES)
@@ -36,8 +36,8 @@ public class CtpFutureContractProvider implements ICategorizedContractProvider, 
 	}
 
 	@Override
-	public List<ContractField> loadContract() {
-		return loadContractDefinition()
+	public List<ContractField> loadContracts() {
+		return loadContractDefinitions()
 				.stream()
 				.map(def -> contractMgr.relativeContracts(def.contractDefId()))
 				.flatMap(Collection::stream)

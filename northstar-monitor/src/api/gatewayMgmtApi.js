@@ -33,5 +33,8 @@ export default {
   },
   getSubscribedContracts(gatewayId){
     return baseService.get('/gateway/subContracts?gatewayId=' + gatewayId)
+  },
+  getGatewayTypeDescriptions(){
+    return baseService.get('/gateway/types')
   }
 }
