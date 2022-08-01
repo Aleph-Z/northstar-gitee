@@ -19,12 +19,12 @@ import xyz.redtorch.pb.CoreField.BarField;
  *
  */
 public interface AverageFunctions {
-	
+
 	/**
 	 * 当日成交量加权均价（当日结算价）
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
-	 * @param resetPerDay
-	 * @param length
+	 * @param
+	 * @param
 	 * @return
 	 */
 	static Function<BarField, TimeSeriesValue> SETTLE(){
@@ -61,7 +61,7 @@ public interface AverageFunctions {
 		return tv -> {
 			double val = tv.getValue();
 			long timestamp = tv.getTimestamp();
-			if(hasInitVal.get()) {			
+			if(hasInitVal.get()) {
 				ema.set(factor * val + (1 - factor) * ema.get());
 			} else {
 				ema.set(val);
@@ -70,7 +70,7 @@ public interface AverageFunctions {
 			return new TimeSeriesValue(ema.get(), timestamp);
 		};
 	}
-	
+
 	/**
 	 * 简单移动平均MA
 	 * @param size
@@ -80,6 +80,7 @@ public interface AverageFunctions {
 		final double[] values = new double[size];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble sumOfValues = new AtomicDouble();
+		System.out.println("------------values："+values.length);
 		return tv -> {
 			long timestamp = tv.getTimestamp();
 			double val = tv.getValue();
@@ -88,6 +89,35 @@ public interface AverageFunctions {
 			cursor.set(cursor.incrementAndGet() % size);
 			sumOfValues.addAndGet(val - oldVal);
 			val = sumOfValues.get() / size;
+			return new TimeSeriesValue(val, timestamp);
+		};
+	}
+
+	/**
+	 * 函数：STD
+	 * 说明:估算标准差
+	 * 用法:STD(size)为收盘价的size日估算标准差
+	 * @param size
+	 * @return
+	 */
+	static TimeSeriesUnaryOperator STD(TimeSeriesUnaryOperator ma,int size){
+		final double[] values = new double[size];
+		final AtomicInteger cursor = new AtomicInteger();
+		final AtomicDouble sumOfValues = new AtomicDouble();
+		return tv ->{
+			TimeSeriesValue applyMA =ma.apply(tv);
+			long timestamp = tv.getTimestamp();
+			double val = tv.getValue();
+			double oldVal = values[cursor.get()];
+			values[cursor.get()] = val;
+			cursor.set(cursor.incrementAndGet() % size);
+			/**
+			 * 平方差计算方法  前20个值 和 20值平均之间的差  (close - ma20)平方,通过交换法 先 等于close的平方 减ma20的平方
+			 */
+			sumOfValues.addAndGet(Math.pow(val,2) - Math.pow(oldVal,2));
+			val = ( sumOfValues.get() - (Math.pow(applyMA.getValue(),2) * size) ) ;
+			//求平均值并且开平方
+			val = Math.sqrt(val / size);
 			return new TimeSeriesValue(val, timestamp);
 		};
 	}
