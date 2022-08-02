@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.gateway.api.ContractProviderComponent;
 import tech.quantit.northstar.gateway.api.ICategorizedContractProvider;
 import xyz.redtorch.pb.CoreField.ContractField;
 
@@ -61,9 +59,9 @@ public class ContractController {
 
 	@GetMapping("/providers")
 	@NotNull(message="网关类型不能为空")
-	public ResponseEntity<ResultBean<List<String>>> providerList(GatewayType gatewayType){
+	public ResponseEntity<ResultBean<List<String>>> providerList(String gatewayType){
 		ResultBean<List<String>> body = new ResultBean<>(contractProviders.stream()
-				.filter(pvd -> pvd.getClass().getDeclaredAnnotation(ContractProviderComponent.class).value() == gatewayType)
+				.filter(pvd -> pvd.gatewayType().name().equals(gatewayType))
 				.map(ICategorizedContractProvider::nameOfCategory)
 				.toList());
 		return ResponseEntity.ok()

@@ -1,6 +1,6 @@
 package tech.quantit.northstar.common.constant;
 
-
+@Deprecated
 public enum GatewayType {
 	
 	/**

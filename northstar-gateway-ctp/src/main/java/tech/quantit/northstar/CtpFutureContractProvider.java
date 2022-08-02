@@ -3,24 +3,29 @@ package tech.quantit.northstar;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.IContractManager;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.model.ContractDefinition;
-import tech.quantit.northstar.gateway.api.ContractProviderComponent;
 import tech.quantit.northstar.gateway.api.ICategorizedContractProvider;
 import xyz.redtorch.pb.CoreEnum.ProductClassEnum;
 import xyz.redtorch.pb.CoreField.ContractField;
 
-@Slf4j
-@ContractProviderComponent(GatewayType.CTP)
-public class CtpFutureContractProvider implements ICategorizedContractProvider, InitializingBean{
+@Component
+public class CtpFutureContractProvider implements ICategorizedContractProvider {
 
 	@Autowired
 	IContractManager contractMgr;
+	
+	@Autowired
+	CTP ctp;
+	
+	@Override
+	public GatewayType gatewayType() {
+		return ctp;
+	}
 	
 	@Override
 	public String nameOfCategory() {
@@ -31,7 +36,7 @@ public class CtpFutureContractProvider implements ICategorizedContractProvider, 
 	public List<ContractDefinition> loadContractDefinitions() {
 		return contractMgr.getAllContractDefinitions()
 				.stream()
-				.filter(item -> item.getGatewayType() == GatewayType.CTP && item.getProductClass() == ProductClassEnum.FUTURES)
+				.filter(item -> item.getGatewayType().toString().equals(ctp.name()) && item.getProductClass() == ProductClassEnum.FUTURES)
 				.toList();
 	}
 
@@ -44,9 +49,6 @@ public class CtpFutureContractProvider implements ICategorizedContractProvider, 
 				.toList();
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		log.info("加载CtpFutureContractProvider");
-	}
+	
 
 }
