@@ -12,6 +12,7 @@ import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunc
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.STD;
 import static tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute.*;
 
+import tech.quantit.northstar.strategy.api.indicator.function.Boll;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 
@@ -124,11 +125,11 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		this.macdDea = ctx.newIndicator("MACD_DEA", params.indicatorSymbol, minus(EMA(12), EMA(26)).andThen(EMA(9)));
 
 		// Boll 上轨
-		this.bollUpper = ctx.newIndicator("BOLL_UPPER",params.indicatorSymbol,params.t, Indicator.ValueType.CLOSE,upper(MA(params.t),STD(MA(20),params.t),params.k));
+		this.bollUpper = ctx.newIndicator("BOLL_UPPER",params.indicatorSymbol,params.n, Indicator.ValueType.CLOSE, Boll.of(params.n, params.x).upper());
 		// Boll 下轨
-		this.bollLower = ctx.newIndicator("BOLL_LOWER",params.indicatorSymbol,params.t, Indicator.ValueType.CLOSE,lower(MA(params.t),STD(MA(20),params.t),params.k));
+		this.bollLower = ctx.newIndicator("BOLL_LOWER",params.indicatorSymbol,params.n, Indicator.ValueType.CLOSE,Boll.of(params.n, params.x).lower());
 		// Boll 中轨
-		this.bollMid = ctx.newIndicator("BOLL_MID",params.indicatorSymbol,params.t, Indicator.ValueType.CLOSE,MA(params.t));
+		this.bollMid = ctx.newIndicator("BOLL_MID",params.indicatorSymbol,params.n, Indicator.ValueType.CLOSE,Boll.of(params.n, params.x).mid());
 	}
 
 	public static class InitParams extends DynamicParams {
@@ -142,12 +143,11 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		@Setting(value="慢线周期", order=2)
 		private int slow;
 
-		@Setting(value="Boll线T,一般为20", order=3)
-		private int t;
+		@Setting(value="Boll统计天数", order=3)
+		private int n;
 
-		@Setting(value="Boll线K,一般为2", order=4)
-		private int k;
-
+		@Setting(value="Boll宽度", order=4)
+		private int x;
 	}
 
 }
