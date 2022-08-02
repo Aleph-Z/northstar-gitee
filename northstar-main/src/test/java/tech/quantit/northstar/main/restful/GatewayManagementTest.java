@@ -188,21 +188,4 @@ public class GatewayManagementTest {
 			.andExpect(jsonPath("$.status").value(ReturnCode.ERROR));
 	}
 	
-	@Test
-	public void shouldGetContractDef() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(get("/northstar/gateway/contractDefs").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").isArray());
-	}
-	
-	@Test
-	public void shouldGetSubscribableContracts() throws Exception {
-		shouldCreateGateway();
-		
-		mockMvc.perform(get("/northstar/gateway/subContracts?gatewayId=CTP").session(session))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").isArray());
-	}
 }

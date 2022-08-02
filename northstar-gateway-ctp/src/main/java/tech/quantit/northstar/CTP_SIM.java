@@ -30,7 +30,7 @@ public class CTP_SIM implements GatewayType, InitializingBean {
 
 	@Override
 	public String name() {
-		return getClass().getName();
+		return getClass().getSimpleName();
 	}
 
 	@Override

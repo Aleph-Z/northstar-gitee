@@ -1,7 +1,6 @@
 package tech.quantit.northstar.main.restful;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewayTypeDescription;

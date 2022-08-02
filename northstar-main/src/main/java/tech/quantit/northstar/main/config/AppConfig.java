@@ -256,4 +256,5 @@ public class AppConfig implements WebMvcConfigurer {
 	public MailDeliveryManager mailDeliveryManager(IMailMessageContentHandler handler) {
 		return new MailDeliveryManager(new MailSenderFactory(), handler);
 	}
+	
 }

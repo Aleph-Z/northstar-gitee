@@ -37,4 +37,5 @@ public class GatewayTypeProvider {
 	public Collection<GatewayType> getAll(){
 		return typeMap.values();
 	}
+	
 }

@@ -29,7 +29,7 @@ public class PLAYBACK implements GatewayType, InitializingBean{
 
 	@Override
 	public String name() {
-		return getClass().getName();
+		return getClass().getSimpleName();
 	}
 
 	@Override
