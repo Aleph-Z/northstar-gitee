@@ -7,25 +7,25 @@ import org.springframework.stereotype.Component;
 import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
-import xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayFactory;
+import xyz.redtorch.gateway.ctp.x64v6v5v1cpv.CtpSimGatewayFactory;
 
 @Component
-public class CTP implements GatewayType, InitializingBean{
-
+public class CTP_SIM implements GatewayType, InitializingBean {
+	
 	@Autowired
 	private GatewayTypeProvider gtp;
 	
 	@Autowired
-	private CtpGatewayFactory factory;
-	
+	private CtpSimGatewayFactory factory;
+
 	@Override
 	public GatewayUsage[] usage() {
-		return new GatewayUsage[]{GatewayUsage.MARKET_DATA, GatewayUsage.TRADE};
+		return new GatewayUsage[] {GatewayUsage.MARKET_DATA, GatewayUsage.TRADE};
 	}
 
 	@Override
 	public boolean adminOnly() {
-		return false;
+		return true;
 	}
 
 	@Override

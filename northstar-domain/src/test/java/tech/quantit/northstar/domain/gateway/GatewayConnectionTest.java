@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import tech.quantit.northstar.common.constant.ConnectionState;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
@@ -23,7 +22,7 @@ public class GatewayConnectionTest {
 		settings.setUserId("kevin");
 		GatewayDescription gd = GatewayDescription.builder()
 				.gatewayId("testGateway")
-				.gatewayType(GatewayType.CTP)
+				.gatewayType("CTP")
 				.gatewayUsage(GatewayUsage.TRADE)
 				.settings(settings)
 				.build();

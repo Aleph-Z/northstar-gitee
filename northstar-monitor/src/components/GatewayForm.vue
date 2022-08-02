@@ -40,21 +40,17 @@
         <el-col :span="8">
           <el-form-item :label="`${typeLabel}类型`" prop="gatewayType">
             <el-select
-              id="gatewayTypeOptions"
               v-model="form.gatewayType"
               placeholder="未知"
               @change="onChooseGatewayType"
               :disabled="isUpdateMode"
             >
-              <el-option label="CTP" value="CTP"></el-option>
-              <el-option label="SIM" value="SIM"></el-option>
               <el-option
-                v-if="gatewayUsage === 'MARKET_DATA'"
-                label="PLAYBACK"
-                value="PLAYBACK"
+                v-for="(item, i) in gatewayTypeOptions"
+                :label="item"
+                :value="item"
+                :key="i"
               ></el-option>
-              <el-option v-if="$route.query.superuser" label="CTP_SIM" value="CTP_SIM"></el-option>
-              <!-- <el-option label="IB网关" value="beijing"></el-option> -->
             </el-select>
           </el-form-item>
         </el-col>
@@ -151,7 +147,8 @@
 <script>
 import NsCtpForm from '@/components/CtpForm'
 import NsPlaybackForm from '@/components/PlaybackForm'
-import gatewayMgmtApi from '../api/gatewayMgmtApi'
+import gatewayMgmtApi from '@/api/gatewayMgmtApi'
+import contractApi from '@/api/contractApi'
 
 const GATEWAY_ADAPTER = {
   CTP: 'xyz.redtorch.gateway.ctp.x64v6v3v15v.CtpGatewayAdapter',
@@ -213,32 +210,40 @@ export default {
         settings: null
       },
       subscribedContractGroups: [],
-      contractType: '',
-      cacheContracts: {}
+      gatewayTypeOptions: [],
+      contractDefOptions: [],
+      contractType: ''
     }
   },
   computed: {
     typeLabel() {
       return this.gatewayUsage === 'TRADE' ? '账户' : '网关'
-    },
-    contractDefOptions() {
-      if (!this.form.gatewayType) return []
-      return this.cacheContracts[this.form.gatewayType]
     }
   },
   watch: {
-    visible: async function (val) {
+    visible: function (val) {
       if (val) {
         this.form = Object.assign({}, this.gatewayDescription)
         this.form.gatewayUsage = this.gatewayUsage
-        if (this.form.subscribedContractGroups) {
-          this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
-            this.cacheContracts[this.form.gatewayType].find(
-              (item) => `${item.name}@${item.productClass}` === defId
+        this.$nextTick(() => {
+          gatewayMgmtApi.findAll('MARKET_DATA').then((result) => {
+            this.linkedGatewayOptions = result
+          })
+          gatewayMgmtApi.getGatewayTypeDescriptions().then((result) => {
+            this.gatewayTypeOptions = result
+              .filter((item) => item.usage.indexOf(this.gatewayUsage) > -1)
+              .filter((item) => !item.adminOnly || this.$route.query.superuser)
+              .map((item) => item.type)
+          })
+        })
+
+        setTimeout(() => {
+          if (this.form.subscribedContractGroups) {
+            this.subscribedContractGroups = this.form.subscribedContractGroups.map((defId) =>
+              this.contractDefOptions.find((item) => `${item.name}@${item.productClass}` === defId)
             )
-          )
-        }
-        this.linkedGatewayOptions = await gatewayMgmtApi.findAll('MARKET_DATA')
+          }
+        }, 300)
       }
     },
     'form.gatewayType': function (val) {
@@ -250,28 +255,24 @@ export default {
       ) {
         this.subscribedContractGroups = []
       }
-      if (val === 'PLAYBACK') {
-        gatewayMgmtApi.find('CTP').then((result) => {
-          this.subscribedContractGroups = result.subscribedContractGroups.map((contractGroup) =>
-            this.cacheContracts['CTP'].find(
-              (item) => contractGroup === `${item.name}@${item.productClass}`
-            )
-          )
+      if (val) {
+        this.contractDefOptions = []
+        const type = { FUTURES: '期货', OPTION: '期权' }
+        contractApi.getContractProviders(val).then((result) => {
+          const promiseList = result.map((pvd) => contractApi.getContractDefs(pvd))
+          Promise.all(promiseList).then((results) => {
+            results.forEach((res) => {
+              this.contractDefOptions = this.contractDefOptions.concat(res)
+              this.contractDefOptions = this.contractDefOptions.map((item) => {
+                item.value = item.name + '@' + item.productClass
+                item.label = item.name + type[item.productClass]
+                return item
+              })
+            })
+          })
         })
       }
     }
-  },
-  created() {
-    ;['CTP', 'SIM', 'PLAYBACK'].forEach((item) => {
-      const type = { FUTURES: '期货', OPTION: '期权' }
-      gatewayMgmtApi.getContractDef(item).then((results) => {
-        this.cacheContracts[item] = results.map((result) => {
-          result.value = result.name + '@' + result.productClass
-          result.label = result.name + type[result.productClass]
-          return result
-        })
-      })
-    })
   },
   methods: {
     onChooseGatewayType() {

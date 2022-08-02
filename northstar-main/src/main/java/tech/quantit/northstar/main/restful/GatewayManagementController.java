@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
-import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewayTypeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.domain.gateway.ContractManager;
+import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.main.service.GatewayService;
 
 @RequestMapping("/northstar/gateway")
@@ -35,6 +35,9 @@ public class GatewayManagementController {
 	
 	@Autowired
 	protected ContractManager contractMgr;
+	
+	@Autowired
+	protected GatewayTypeProvider gatewayTypeProvider;
 	
 	@PostMapping
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
@@ -96,23 +99,23 @@ public class GatewayManagementController {
 		return new ResultBean<>(gatewayService.simMoneyIO(gatewayId, money));
 	}
 	
-	@Deprecated
-	@GetMapping("/contractDefs")
-	@NotNull(message="网关类型不能为空")
-	public ResultBean<List<ContractDefinition>> getContractDefinitions(GatewayType gatewayType){
-		return new ResultBean<>(gatewayService.contractDefinitions(gatewayType));
-	}
-	
-	@Deprecated
-	@GetMapping("/subContracts")
-	@NotNull(message="网关类型不能为空")
-	public ResultBean<List<byte[]>> getSubscribedContracts(String gatewayId){
-		return new ResultBean<>(gatewayService.getSubscribedContracts(gatewayId));
-	}
+//	@Deprecated
+//	@GetMapping("/contractDefs")
+//	@NotNull(message="网关类型不能为空")
+//	public ResultBean<List<ContractDefinition>> getContractDefinitions(GatewayType gatewayType){
+//		return new ResultBean<>(gatewayService.contractDefinitions(gatewayType));
+//	}
+//	
+//	@Deprecated
+//	@GetMapping("/subContracts")
+//	@NotNull(message="网关类型不能为空")
+//	public ResultBean<List<byte[]>> getSubscribedContracts(String gatewayId){
+//		return new ResultBean<>(gatewayService.getSubscribedContracts(gatewayId));
+//	}
 	
 	@GetMapping("/types")
 	public ResultBean<Collection<GatewayTypeDescription>> gatewayTypeOptions(){
-		return new ResultBean<>(EnumSet.allOf(GatewayType.class)
+		return new ResultBean<>(gatewayTypeProvider.getAll()
 				.stream()
 				.map(GatewayTypeDescription::new)
 				.toList());

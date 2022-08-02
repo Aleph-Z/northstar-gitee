@@ -7,12 +7,16 @@ import org.springframework.stereotype.Component;
 import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
+import tech.quantit.northstar.gateway.sim.trade.SimGatewayFactory;
 
 @Component
 public class SIM implements GatewayType, InitializingBean{
 
 	@Autowired
 	GatewayTypeProvider gtp;
+	
+	@Autowired
+	SimGatewayFactory factory;
 	
 	@Override
 	public GatewayUsage[] usage() {
@@ -31,7 +35,7 @@ public class SIM implements GatewayType, InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		gtp.addGatewayType(this);
+		gtp.addGatewayType(this, factory);
 	}
 
 }

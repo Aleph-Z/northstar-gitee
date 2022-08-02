@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tech.quantit.northstar.common.constant.GatewayType;
+import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 
 @AllArgsConstructor
@@ -12,14 +12,14 @@ import tech.quantit.northstar.common.constant.GatewayUsage;
 @Builder
 @Data
 public class GatewayTypeDescription {
-
+	
 	private GatewayType type;
 	
 	public GatewayUsage[] getUsage() {
-		return type.getUsage();
+		return type.usage();
 	}
 	
 	public boolean isAdminOnly() {
-		return type.isAdminOnly();
+		return type.adminOnly();
 	}
 }

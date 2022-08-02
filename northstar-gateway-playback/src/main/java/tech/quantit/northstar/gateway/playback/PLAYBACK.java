@@ -14,6 +14,9 @@ public class PLAYBACK implements GatewayType, InitializingBean{
 	@Autowired
 	GatewayTypeProvider gtp;
 	
+	@Autowired
+	PlaybackGatewayFactory factory;
+	
 	@Override
 	public GatewayUsage[] usage() {
 		return new GatewayUsage[] {GatewayUsage.MARKET_DATA};
@@ -31,7 +34,7 @@ public class PLAYBACK implements GatewayType, InitializingBean{
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		gtp.addGatewayType(this);
+		gtp.addGatewayType(this, factory);
 	}
 
 }

@@ -2,7 +2,6 @@ package common;
 
 import java.util.List;
 
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
@@ -21,7 +20,7 @@ public class TestGatewayFactory {
 		return null;
 	}
 	
-	public static GatewayDescription makeMktGateway(String id, GatewayType type, Object settings, boolean autoConnect) {
+	public static GatewayDescription makeMktGateway(String id, String type, Object settings, boolean autoConnect) {
 		return GatewayDescription.builder()
 				.gatewayId(id)
 				.autoConnect(autoConnect)
@@ -32,7 +31,7 @@ public class TestGatewayFactory {
 				.build();
 	}
 	
-	public static GatewayDescription makeTrdGateway(String id, String bindGateway, GatewayType type, Object settings, boolean autoConnect) {
+	public static GatewayDescription makeTrdGateway(String id, String bindGateway, String type, Object settings, boolean autoConnect) {
 		return GatewayDescription.builder()
 				.gatewayId(id)
 				.autoConnect(autoConnect)

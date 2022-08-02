@@ -27,7 +27,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.ModuleType;
 import tech.quantit.northstar.common.constant.ReturnCode;
 import tech.quantit.northstar.common.model.ComponentAndParamsPair;
@@ -87,10 +86,10 @@ class ModuleControllerTest {
 		
 		mockMvc.perform(post("/northstar/auth/login").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(new NsUser("admin","123456"))).session(session))
 			.andExpect(status().isOk());
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session));
 		
-		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "CTP", GatewayType.CTP, TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
+		GatewayDescription gatewayDes2 = TestGatewayFactory.makeTrdGateway("CTP账户", "CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes2)).session(session));
 		
 		ComponentAndParamsPair cpp = ComponentAndParamsPair.builder()
