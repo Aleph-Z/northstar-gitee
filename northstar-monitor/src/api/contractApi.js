@@ -9,5 +9,8 @@ export default {
     },
     getContractProviders(gatewayType){
         return baseService.get(`/contract/providers?gatewayType=${gatewayType}`)
+    },
+    getSubscribedContractList(gatewayId){
+        return baseService.get(`/contract/sub?gatewayId=${gatewayId}`)
     }
 }

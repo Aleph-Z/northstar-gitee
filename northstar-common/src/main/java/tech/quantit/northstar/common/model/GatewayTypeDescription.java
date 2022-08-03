@@ -15,6 +15,10 @@ public class GatewayTypeDescription {
 	
 	private GatewayType type;
 	
+	public String getName() {
+		return type.name();
+	}
+	
 	public GatewayUsage[] getUsage() {
 		return type.usage();
 	}

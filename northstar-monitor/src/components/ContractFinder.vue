@@ -63,22 +63,25 @@ export default {
   },
   watch: {
     gatewayType: function (val) {
+      this.contractType = ''
       this.unifiedSymbol = ''
       contractApi.getContractProviders(val).then((result) => {
         this.contractTypeOptions = result
       })
     },
     contractType: function (val) {
-      contractApi.getContractList(val).then((result) => {
-        this.contractList = result
-          .map((item) => ContractField.deserializeBinary(item).toObject())
-          .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
-      })
+      if (val) {
+        contractApi.getContractList(val).then((result) => {
+          this.contractList = result
+            .map((item) => ContractField.deserializeBinary(item).toObject())
+            .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
+        })
+      }
     }
   },
   mounted() {
     gatewayMgmtApi.getGatewayTypeDescriptions().then((result) => {
-      this.gatewayTypes = result.filter((item) => !item.adminOnly).map((item) => item.type)
+      this.gatewayTypes = result.filter((item) => !item.adminOnly).map((item) => item.name)
     })
   },
   methods: {

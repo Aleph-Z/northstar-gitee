@@ -147,6 +147,7 @@ import NsAccountDetail from '@/components/AccountDetail'
 import NsMarketData from '@/components/MarketData'
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
 import tradeOprApi from '@/api/tradeOprApi'
+import contractApi from '@/api/contractApi'
 import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 let accountCheckTimer
@@ -212,8 +213,8 @@ export default {
       }
       timelyCheck()
 
-      gatewayMgmtApi
-        .getSubscribedContracts(this.chosenAccount.bindedMktGatewayId)
+      contractApi
+        .getSubscribedContractList(this.chosenAccount.bindedMktGatewayId)
         .then((list) => {
           this.symbolList = list
             .map((item) => ContractField.deserializeBinary(item).toObject())

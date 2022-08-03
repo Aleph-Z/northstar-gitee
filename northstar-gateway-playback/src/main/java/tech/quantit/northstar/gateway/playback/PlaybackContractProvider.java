@@ -36,7 +36,7 @@ public class PlaybackContractProvider implements ICategorizedContractProvider{
 	public List<ContractDefinition> loadContractDefinitions() {
 		return contractMgr.getAllContractDefinitions()
 				.stream()
-				.filter(item -> item.getGatewayType().toString().equals("CTP") && item.getProductClass() == ProductClassEnum.FUTURES)
+				.filter(item -> item.getGatewayType().equals("CTP") && item.getProductClass() == ProductClassEnum.FUTURES)
 				.toList();
 	}
 

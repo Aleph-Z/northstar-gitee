@@ -36,7 +36,7 @@ public class CtpOptionContractProvider implements ICategorizedContractProvider {
 	public List<ContractDefinition> loadContractDefinitions() {
 		return contractMgr.getAllContractDefinitions()
 				.stream()
-				.filter(item -> item.getGatewayType().toString().equals(ctp.name()) && item.getProductClass() == ProductClassEnum.OPTION)
+				.filter(item -> item.getGatewayType().equals(ctp.name()) && item.getProductClass() == ProductClassEnum.OPTION)
 				.toList();
 	}
 

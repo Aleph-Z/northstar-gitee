@@ -28,9 +28,6 @@ export default {
   isActive(gatewayId) {
     return baseService.get('/gateway/active?gatewayId=' + gatewayId)
   },
-  getContractDef(gatewayType){
-    return baseService.get('/gateway/contractDefs?gatewayType=' + gatewayType)
-  },
   getSubscribedContracts(gatewayId){
     return baseService.get('/gateway/subContracts?gatewayId=' + gatewayId)
   },

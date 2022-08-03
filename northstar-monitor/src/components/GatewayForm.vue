@@ -103,7 +103,6 @@
               filterable
               collapse-tags
               placeholder="请选择合约"
-              :disabled="form.gatewayType === 'PLAYBACK'"
             >
               <el-option
                 v-for="item in contractDefOptions"
@@ -233,7 +232,7 @@ export default {
             this.gatewayTypeOptions = result
               .filter((item) => item.usage.indexOf(this.gatewayUsage) > -1)
               .filter((item) => !item.adminOnly || this.$route.query.superuser)
-              .map((item) => item.type)
+              .map((item) => item.name)
           })
         })
 

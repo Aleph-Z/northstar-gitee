@@ -32,7 +32,7 @@ public class SimContractProvider implements ICategorizedContractProvider {
 	public List<ContractDefinition> loadContractDefinitions() {
 		return contractMgr.getAllContractDefinitions()
 				.stream()
-				.filter(item -> item.getGatewayType().toString().equals("SIM") && item.getProductClass() == ProductClassEnum.FUTURES)
+				.filter(item -> item.getGatewayType().equals("SIM") && item.getProductClass() == ProductClassEnum.FUTURES)
 				.toList();
 	}
 

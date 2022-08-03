@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import gatewayMgmtApi from '@/api/gatewayMgmtApi'
+import contractApi from '@/api/contractApi'
 import { ContractField } from '@/lib/xyz/redtorch/pb/core_field_pb'
 
 import moment from 'moment'
@@ -81,6 +81,10 @@ export default {
     playbackSettingsSrc: {
       type: Object,
       default: () => {}
+    },
+    gatewayId: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -136,8 +140,8 @@ export default {
   watch: {
     visible: function (val) {
       if (val) {
-        gatewayMgmtApi
-          .getSubscribedContracts('CTP')
+        contractApi
+          .getSubscribedContractList(this.gatewayId)
           .then((result) => {
             this.contractOptions = result
               .map((item) => ContractField.deserializeBinary(item).toObject())

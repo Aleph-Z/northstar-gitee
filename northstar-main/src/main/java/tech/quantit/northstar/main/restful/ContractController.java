@@ -1,6 +1,5 @@
 package tech.quantit.northstar.main.restful;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tech.quantit.northstar.common.model.ContractDefinition;
 import tech.quantit.northstar.common.model.ResultBean;
-import tech.quantit.northstar.gateway.api.ICategorizedContractProvider;
+import tech.quantit.northstar.main.service.ContractService;
 import xyz.redtorch.pb.CoreField.ContractField;
 
 @RequestMapping("/northstar/contract")
@@ -23,7 +22,7 @@ import xyz.redtorch.pb.CoreField.ContractField;
 public class ContractController {
 	
 	@Autowired
-	List<ICategorizedContractProvider> contractProviders;
+	private ContractService service;
 	
 	final CacheControl cacheControl = CacheControl
 			.maxAge(1, TimeUnit.DAYS)
@@ -33,39 +32,34 @@ public class ContractController {
 	@GetMapping("/defs")
 	@NotNull(message="合约类别名称不能为空")
 	public ResponseEntity<ResultBean<List<ContractDefinition>>> getContractDefinitions(String name){
-		ResultBean<List<ContractDefinition>> body =new ResultBean<>(contractProviders.stream()
-				.filter(pvd -> pvd.nameOfCategory().equals(name))
-				.map(ICategorizedContractProvider::loadContractDefinitions)
-				.flatMap(Collection::stream)
-				.toList());
 		return ResponseEntity.ok()
 			      .cacheControl(cacheControl)
-			      .body(body);
+			      .body(new ResultBean<>(service.getContractDefinitions(name)));
+	}
+	
+	@GetMapping("/providers")
+	@NotNull(message="网关类型不能为空")
+	public ResponseEntity<ResultBean<List<String>>> providerList(String gatewayType){
+		return ResponseEntity.ok()
+			      .cacheControl(cacheControl)
+			      .body(new ResultBean<>(service.getContractProviders(gatewayType)));
 	}
 	
 	@GetMapping("/list")
 	@NotNull(message="合约类别名称不能为空")
-	public ResponseEntity<ResultBean<List<byte[]>>> getContractList(String name){
-		ResultBean<List<byte[]>> body = new ResultBean<>(contractProviders.stream()
-				.filter(pvd -> pvd.nameOfCategory().equals(name))
-				.map(ICategorizedContractProvider::loadContracts)
-				.flatMap(Collection::stream)
+	public ResultBean<List<byte[]>> getContractList(String name){
+		return new ResultBean<>(service.getContractList(name)
+				.stream()
 				.map(ContractField::toByteArray)
 				.toList());
-		return ResponseEntity.ok()
-			      .cacheControl(cacheControl)
-			      .body(body);
 	}
-
-	@GetMapping("/providers")
-	@NotNull(message="网关类型不能为空")
-	public ResponseEntity<ResultBean<List<String>>> providerList(String gatewayType){
-		ResultBean<List<String>> body = new ResultBean<>(contractProviders.stream()
-				.filter(pvd -> pvd.gatewayType().name().equals(gatewayType))
-				.map(ICategorizedContractProvider::nameOfCategory)
+	
+	@GetMapping("/sub")
+	@NotNull(message="网关ID不能为空")
+	public ResultBean<List<byte[]>> getSubscribedContractList(String gatewayId){
+		return new ResultBean<>(service.getSubscribedContractList(gatewayId)
+				.stream()
+				.map(ContractField::toByteArray)
 				.toList());
-		return ResponseEntity.ok()
-			      .cacheControl(cacheControl)
-			      .body(body);
 	}
 }
