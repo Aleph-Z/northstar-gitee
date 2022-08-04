@@ -78,7 +78,7 @@ export default {
         if (!this.gatewaySettingsObject) {
           return
         }
-        Object.assign(this.gatewaySettings, this.gatewaySettingsObject)
+        this.gatewaySettings = Object.assign({}, this.gatewaySettingsObject)
       }
     }
   },
@@ -87,11 +87,15 @@ export default {
       this.$emit('update:visible', false)
     },
     saveSettings() {
+      this.gatewaySettingsMetaInfo.forEach((item) => {
+        if (!this.gatewaySettings[item.name]) {
+          throw new Error(`【${item.label}】不能为空`)
+        }
+      })
       let obj = {}
       Object.assign(obj, this.gatewaySettings)
       this.$emit('onSave', obj)
       this.close()
-      this.gatewaySettings = {}
     }
   }
 }

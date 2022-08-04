@@ -8,7 +8,9 @@
     :show-close="false"
     destroy-on-close
   >
-    <div class="warning-text pb-20"><i class="el-icon-warning" /> 回放网关不支持修改操作</div>
+    <div v-if="isUpdateMode" class="warning-text pb-20">
+      <i class="el-icon-warning" /> 回放网关不支持修改操作
+    </div>
     <el-form
       ref="playbackSettings"
       :model="playbackSettings"
@@ -143,7 +145,9 @@ export default {
   watch: {
     visible: function (val) {
       if (val) {
-        this.isUpdateMode = Object.keys(this.playbackSettingsSrc).length > 0
+        if (this.playbackSettingsSrc) {
+          this.isUpdateMode = Object.keys(this.playbackSettingsSrc).length > 0
+        }
         this.contractOptions = []
         this.subscribedContractGroups.forEach((item) => {
           contractApi.getSubscribableContractList(item.value).then((result) => {
