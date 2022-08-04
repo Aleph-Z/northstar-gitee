@@ -100,7 +100,7 @@ public class GatewayManagementController {
 	
 	@GetMapping("/settings")
 	@NotNull(message="网关类型不能为空")
-	public ResultBean<List<ComponentField>> getGatewaySettingsMetaInfo(String gatewayType){
+	public ResultBean<Collection<ComponentField>> getGatewaySettingsMetaInfo(String gatewayType){
 		return new ResultBean<>(gatewayService.getGatewaySettingsMetaInfo(gatewayType));
 	}
 	

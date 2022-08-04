@@ -1,6 +1,7 @@
 package tech.quantit.northstar.main.service;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,7 @@ import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
 import tech.quantit.northstar.domain.gateway.GatewayConnection;
 import tech.quantit.northstar.gateway.api.Gateway;
 import tech.quantit.northstar.gateway.api.GatewayFactory;
+import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
@@ -45,6 +47,8 @@ public class GatewayService implements InitializingBean {
 	private GatewayAndConnectionManager gatewayConnMgr;
 	
 	private GatewayTypeProvider gatewayTypeProvider;
+	
+	private GatewaySettingsMetaInfoProvider gatewaySettingsProvider;
 	
 	private IGatewayRepository gatewayRepo;
 	
@@ -263,9 +267,8 @@ public class GatewayService implements InitializingBean {
 		}
 	}
 	
-	public List<ComponentField> getGatewaySettingsMetaInfo(String gatewayType) {
-		// TODO Auto-generated method stub
-		return null;
+	public Collection<ComponentField> getGatewaySettingsMetaInfo(String gatewayType) {
+		return gatewaySettingsProvider.getSettings(gatewayType);
 	}
 	
 	@Override

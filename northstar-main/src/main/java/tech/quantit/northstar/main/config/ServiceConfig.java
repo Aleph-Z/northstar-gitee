@@ -19,6 +19,7 @@ import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.domain.account.TradeDayAccount;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.domain.gateway.GatewayAndConnectionManager;
+import tech.quantit.northstar.gateway.api.GatewaySettingsMetaInfoProvider;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.gateway.api.ICategorizedContractProvider;
 import tech.quantit.northstar.main.ExternalJarClassLoader;
@@ -56,8 +57,9 @@ public class ServiceConfig {
 	
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
-			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayTypeProvider gtp) {
-		return new GatewayService(gatewayConnMgr, gtp, gatewayRepo, mdRepo, simAccRepo, playbackRtRepo, moduleRepo);
+			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayTypeProvider gtp,
+			GatewaySettingsMetaInfoProvider settingsPvd) {
+		return new GatewayService(gatewayConnMgr, gtp, settingsPvd, gatewayRepo, mdRepo, simAccRepo, playbackRtRepo, moduleRepo);
 	}
 	
 	@Bean

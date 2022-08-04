@@ -26,7 +26,7 @@ public class CtpGatewaySettings extends DynamicParams implements GatewaySettings
 	@Setting(label = "网关账户", order = 10)
 	private String userId;
 	
-	@Setting(label = "网关密码", order = 20)
+	@Setting(label = "网关密码", type = FieldType.PASSWORD, order = 20)
 	private String password;
 	
 	@Setting(label = "期货公司", type = FieldType.SELECT, options = {"宏源主席", "宏源次席"}, optionsVal = {"1080", "2070"}, placeholder = "请选择", order = 30)

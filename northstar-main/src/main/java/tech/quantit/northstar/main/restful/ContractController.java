@@ -62,4 +62,13 @@ public class ContractController {
 				.map(ContractField::toByteArray)
 				.toList());
 	}
+	
+	@GetMapping("/subable")
+	@NotNull(message="合约定义ID不能为空")
+	public ResultBean<List<byte[]>> getSubscribableContractList(String contractDefId){
+		return new ResultBean<>(service.getSubscribableContractList(contractDefId)
+				.stream()
+				.map(ContractField::toByteArray)
+				.toList());
+	}
 }

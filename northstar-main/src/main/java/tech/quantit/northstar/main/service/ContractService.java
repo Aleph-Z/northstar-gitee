@@ -59,4 +59,10 @@ public class ContractService {
 				.flatMap(Collection::stream)
 				.toList();
 	}
+	
+	public List<ContractField> getSubscribableContractList(String contractDefId){
+		return contractMgr.relativeContracts(contractDefId)
+				.stream()
+				.toList();
+	}
 }

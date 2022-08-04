@@ -1,6 +1,5 @@
 package tech.quantit.northstar.gateway.playback;
 
-import tech.quantit.northstar.common.GatewayType;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreField.ContractField;
 import xyz.redtorch.pb.CoreField.GatewaySettingField;

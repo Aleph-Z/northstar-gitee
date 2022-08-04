@@ -6,7 +6,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import tech.quantit.northstar.common.constant.FieldType;
@@ -43,12 +42,14 @@ public class PlaybackGatewaySettings extends DynamicParams implements GatewaySet
 	/**
 	 * 回放精度
 	 */
-	@Setting(label="回放精度", order=30, type=FieldType.SELECT, options = {"低（每分钟4个TICK）", "中（每分钟30个TICK）", "高（每分钟120个TICK）"})
+	@Setting(label="回放精度", order=30, type=FieldType.SELECT, 
+			options = {"低（每分钟4个TICK）", "中（每分钟30个TICK）", "高（每分钟120个TICK）"}, 
+			optionsVal = {"LOW", "MEDIUM", "HIGH"})
 	private PlaybackPrecision precision;
 	/**
 	 * 回放速度
 	 */
-	@Setting(label="回放速度", order=40, type=FieldType.SELECT, options = {"正常", "极速"})
+	@Setting(label="回放速度", order=40, type=FieldType.SELECT, options = {"正常", "极速"}, optionsVal = {"NORMAL", "SPRINT"})
 	private PlaybackSpeed speed;
 	/**
 	 * 回放的合约清单

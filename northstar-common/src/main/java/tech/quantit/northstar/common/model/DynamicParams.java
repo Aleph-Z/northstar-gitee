@@ -23,7 +23,7 @@ public abstract class DynamicParams {
 			ComponentField cf = e.getValue();
 			boolean flag = f.canAccess(this);
 			f.setAccessible(true);
-			if("Number".equals(cf.getType())) {
+			if(FieldType.NUMBER == cf.getType()) {
 				if(f.getType() == int.class) {
 					f.setInt(this,cf.getValue() == null ? 0 : cf.getValue() instanceof String ? Integer.parseInt((String) cf.getValue()) : (int)cf.getValue());
 				} else if (f.getType() == long.class) {

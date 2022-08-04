@@ -12,5 +12,8 @@ export default {
     },
     getSubscribedContractList(gatewayId){
         return baseService.get(`/contract/sub?gatewayId=${gatewayId}`)
+    },
+    getSubscribableContractList(contractDefId){
+        return baseService.get(`/contract/subable?contractDefId=${contractDefId}`)
     }
 }

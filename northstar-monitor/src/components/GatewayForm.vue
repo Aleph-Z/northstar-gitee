@@ -7,13 +7,18 @@
     :close-on-click-modal="false"
     :show-close="false"
   >
-    <NsCtpForm
-      :visible.sync="ctpFormVisible"
-      :ctpSettingsSrc="form.settings"
+    <GatewaySettingsForm
+      v-if="form.gatewayType !== 'PLAYBACK'"
+      :visible.sync="gatewaySettingsFormVisible"
+      :gatewayType="form.gatewayType"
+      :gatewaySettingsMetaInfo="gatewaySettingsMetaInfo"
+      :gatewaySettingsObject="form.settings"
       @onSave="(settings) => (form.settings = settings)"
     />
-    <NsPlaybackForm
-      :visible.sync="playbackFormVisible"
+    <PlaybackForm
+      v-else
+      :visible.sync="gatewaySettingsFormVisible"
+      :subscribedContractGroups="subscribedContractGroups"
       :playbackSettingsSrc="form.settings"
       @onSave="(settings) => (form.settings = settings)"
     />
@@ -132,9 +137,8 @@
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
       <el-button
-        id="gatewaySettings"
         type="primary"
-        @click="gatewaySettingConfig"
+        @click="gatewaySettingsFormVisible = true"
         :disabled="!form.gatewayType || form.gatewayType === 'SIM'"
         >{{ typeLabel }}配置</el-button
       >
@@ -144,8 +148,8 @@
 </template>
 
 <script>
-import NsCtpForm from '@/components/CtpForm'
-import NsPlaybackForm from '@/components/PlaybackForm'
+import GatewaySettingsForm from '@/components/GatewaySettingsForm'
+import PlaybackForm from '@/components/PlaybackForm'
 import gatewayMgmtApi from '@/api/gatewayMgmtApi'
 import contractApi from '@/api/contractApi'
 
@@ -163,8 +167,8 @@ const CONNECTION_STATE = {
 }
 export default {
   components: {
-    NsCtpForm,
-    NsPlaybackForm
+    GatewaySettingsForm,
+    PlaybackForm
   },
   props: {
     visible: {
@@ -193,9 +197,7 @@ export default {
         gatewayUsage: [{ required: true, message: '不能为空', trigger: 'blur' }],
         bindedMktGatewayId: [{ required: true, message: '不能为空', trigger: 'blur' }]
       },
-      ctpFormVisible: false,
-      playbackFormVisible: false,
-      contractFormVisible: false,
+      gatewaySettingsFormVisible: false,
       form: {
         gatewayId: '',
         description: '',
@@ -211,7 +213,8 @@ export default {
       subscribedContractGroups: [],
       gatewayTypeOptions: [],
       contractDefOptions: [],
-      contractType: ''
+      contractType: '',
+      gatewaySettingsMetaInfo: []
     }
   },
   computed: {
@@ -256,6 +259,16 @@ export default {
       }
       if (val) {
         this.contractDefOptions = []
+
+        if (val !== 'SIM') {
+          // 获取网关配置元信息
+          gatewayMgmtApi.getGatewaySettingsMetaInfo(val).then((result) => {
+            this.gatewaySettingsMetaInfo = result
+            this.gatewaySettingsMetaInfo.sort((a, b) => (a.order < b.order ? -1 : 1))
+          })
+        }
+
+        // 获取合约品种列表
         const type = { FUTURES: '期货', OPTION: '期权' }
         contractApi.getContractProviders(val).then((result) => {
           const promiseList = result.map((pvd) => contractApi.getContractDefs(pvd))
@@ -278,14 +291,6 @@ export default {
       this.form.gatewayAdapterType = GATEWAY_ADAPTER[this.form.gatewayType]
       if (this.gatewayUsage === 'MARKET_DATA' && this.form.gatewayType !== 'PLAYBACK') {
         this.form.gatewayId = `${this.form.gatewayType}`
-      }
-    },
-    gatewaySettingConfig() {
-      if (this.form.gatewayType === 'CTP' || this.form.gatewayType === 'CTP_SIM') {
-        this.ctpFormVisible = true
-      }
-      if (this.form.gatewayType === 'PLAYBACK') {
-        this.playbackFormVisible = true
       }
     },
     async saveGateway() {

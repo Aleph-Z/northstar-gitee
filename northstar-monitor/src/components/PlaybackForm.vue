@@ -8,12 +8,14 @@
     :show-close="false"
     destroy-on-close
   >
+    <div class="warning-text pb-20"><i class="el-icon-warning" /> 回放网关不支持修改操作</div>
     <el-form
       ref="playbackSettings"
       :model="playbackSettings"
       label-width="100px"
       width="200px"
       :rules="formRules"
+      :disabled="isUpdateMode"
     >
       <el-form-item label="回放日期">
         <el-date-picker
@@ -61,7 +63,7 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="savePlaybackSetting">保 存</el-button>
+      <el-button v-if="!isUpdateMode" type="primary" @click="savePlaybackSetting">保 存</el-button>
     </div>
   </el-dialog>
 </template>
@@ -82,9 +84,9 @@ export default {
       type: Object,
       default: () => {}
     },
-    gatewayId: {
-      type: String,
-      default: ''
+    subscribedContractGroups: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -134,22 +136,23 @@ export default {
         precision: '',
         speed: '',
         unifiedSymbols: []
-      }
+      },
+      isUpdateMode: false
     }
   },
   watch: {
     visible: function (val) {
       if (val) {
-        contractApi
-          .getSubscribedContractList(this.gatewayId)
-          .then((result) => {
-            this.contractOptions = result
+        this.isUpdateMode = Object.keys(this.playbackSettingsSrc).length > 0
+        this.contractOptions = []
+        this.subscribedContractGroups.forEach((item) => {
+          contractApi.getSubscribableContractList(item.value).then((result) => {
+            const contracts = result
               .map((item) => ContractField.deserializeBinary(item).toObject())
               .sort((a, b) => a['unifiedsymbol'].localeCompare(b['unifiedsymbol']))
+            this.contractOptions = this.contractOptions.concat(contracts)
           })
-          .catch(() => {
-            this.$message.warning('CTP网关未创建，所以检测不到可回放合约')
-          })
+        })
         if (!this.playbackSettingsSrc) {
           return
         }

@@ -2,6 +2,7 @@ package tech.quantit.northstar.strategy.api.demo;
 
 import org.apache.commons.lang3.StringUtils;
 
+import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
@@ -99,10 +100,10 @@ public class ManyContractToOneAccountSampleStrategy extends AbstractStrategy	// 
 		@Setting(label="远月合约", order=20)
 		private String distantContract;
 		
-		@Setting(label="最小价差", order=30)
+		@Setting(label="最小价差", type = FieldType.NUMBER, order=30)
 		private int minDiff;
 		
-		@Setting(label="最大价差", order=40)
+		@Setting(label="最大价差", type = FieldType.NUMBER, order=40)
 		private int maxDiff;
 		
 	}

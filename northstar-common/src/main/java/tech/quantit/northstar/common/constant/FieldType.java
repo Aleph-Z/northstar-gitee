@@ -4,6 +4,8 @@ public enum FieldType {
 
 	TEXT,
 	
+	PASSWORD,
+	
 	NUMBER,
 	
 	DATE,
