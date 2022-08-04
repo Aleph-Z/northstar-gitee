@@ -93,16 +93,16 @@ public class ManyContractToOneAccountSampleStrategy extends AbstractStrategy	// 
 	
 	public static class InitParams extends DynamicParams {			
 		
-		@Setting(value="近月合约", order=10)		
+		@Setting(label="近月合约", order=10)		
 		private String nearbyContract;
 		
-		@Setting(value="远月合约", order=20)
+		@Setting(label="远月合约", order=20)
 		private String distantContract;
 		
-		@Setting(value="最小价差", order=30)
+		@Setting(label="最小价差", order=30)
 		private int minDiff;
 		
-		@Setting(value="最大价差", order=40)
+		@Setting(label="最大价差", order=40)
 		private int maxDiff;
 		
 	}

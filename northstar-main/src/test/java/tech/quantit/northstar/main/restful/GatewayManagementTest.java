@@ -23,9 +23,9 @@ import com.alibaba.fastjson.JSON;
 import com.corundumstudio.socketio.SocketIOServer;
 
 import common.TestGatewayFactory;
+import tech.quantit.northstar.CtpGatewaySettings;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.constant.ReturnCode;
-import tech.quantit.northstar.common.model.CtpSettings;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.NsUser;
 import tech.quantit.northstar.main.NorthstarApplication;
@@ -68,14 +68,14 @@ public class GatewayManagementTest {
 	
 	@Test
 	public void shouldFailWithoutAuth() throws Exception {
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", "CTP", TestGatewayFactory.makeGatewaySettings(CtpSettings.class), false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("testGateway", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)))
 			.andExpect(status().is(401));
 	}
 
 	@Test
 	public void shouldCreateGateway() throws Exception {
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpSettings.class),false);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class),false);
 		mockMvc.perform(post("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));
@@ -94,7 +94,7 @@ public class GatewayManagementTest {
 	public void shouldUpdateGateway() throws Exception {
 		shouldCreateGateway();
 		
-		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpSettings.class), true);
+		GatewayDescription gatewayDes = TestGatewayFactory.makeMktGateway("CTP", "CTP", TestGatewayFactory.makeGatewaySettings(CtpGatewaySettings.class), true);
 		mockMvc.perform(put("/northstar/gateway").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(gatewayDes)).session(session))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(ReturnCode.SUCCESS));

@@ -3,6 +3,7 @@ package tech.quantit.northstar.common.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tech.quantit.northstar.common.constant.FieldType;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +16,7 @@ public class ComponentField {
 	
 	private int order;
 	
-	private String type;
+	private FieldType type;
 	
 	private Object value;
 	
@@ -23,4 +24,7 @@ public class ComponentField {
 	
 	private String[] options;
 	
+	private String[] optionsVal;
+	
+	private String placeholder;
 }

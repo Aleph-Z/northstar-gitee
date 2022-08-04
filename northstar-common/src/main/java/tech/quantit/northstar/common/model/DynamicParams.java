@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import lombok.Getter;
 import lombok.Setter;
+import tech.quantit.northstar.common.constant.FieldType;
 
 @Getter
 @Setter
@@ -53,17 +54,14 @@ public abstract class DynamicParams {
 			if(f.isAnnotationPresent(Setting.class)) {
 				Setting anno = f.getAnnotation(Setting.class);
 				String fieldName = f.getName();
-				String label = anno.value();
+				String label = anno.label();
 				int order = anno.order();
 				String unit = anno.unit();
 				String[] options = anno.options();
-				boolean isNum = f.getType().isAssignableFrom(Number.class) 
-						|| f.getType().equals(int.class)
-						|| f.getType().equals(long.class)
-						|| f.getType().equals(double.class)
-						|| f.getType().equals(float.class);
-				String type = options.length > 0 ? "Options" : isNum ? "Number" : "String";
-				fieldMap.put(fieldName, new ComponentField(label,fieldName, order, type, null, unit, options));
+				String[] optionsVal = anno.optionsVal();
+				FieldType type = anno.type();
+				String placeholder = anno.placeholder();
+				fieldMap.put(fieldName, new ComponentField(label,fieldName, order, type, null, unit, options, optionsVal, placeholder));
 			}
 		}
 		return fieldMap;

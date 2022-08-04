@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import tech.quantit.northstar.common.constant.GatewayUsage;
+import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.GatewayTypeDescription;
 import tech.quantit.northstar.common.model.ResultBean;
@@ -38,8 +39,8 @@ public class GatewayManagementController {
 	protected GatewayTypeProvider gatewayTypeProvider;
 	
 	@PostMapping
+	@NotNull(message="传入对象不能为空")
 	public ResultBean<Boolean> create(@RequestBody GatewayDescription gd) throws Exception {
-		Assert.notNull(gd, "传入对象不能为空");
 		return new ResultBean<>(gatewayService.createGateway(gd));
 	}
 	
@@ -50,8 +51,8 @@ public class GatewayManagementController {
 	}
 	
 	@PutMapping
+	@NotNull(message="传入对象不能为空")
 	public ResultBean<Boolean> modify(@RequestBody GatewayDescription gd) throws Exception {
-		Assert.notNull(gd, "传入对象不能为空");
 		return new ResultBean<>(gatewayService.updateGateway(gd));
 	}
 	
@@ -97,19 +98,11 @@ public class GatewayManagementController {
 		return new ResultBean<>(gatewayService.simMoneyIO(gatewayId, money));
 	}
 	
-//	@Deprecated
-//	@GetMapping("/contractDefs")
-//	@NotNull(message="网关类型不能为空")
-//	public ResultBean<List<ContractDefinition>> getContractDefinitions(GatewayType gatewayType){
-//		return new ResultBean<>(gatewayService.contractDefinitions(gatewayType));
-//	}
-//	
-//	@Deprecated
-//	@GetMapping("/subContracts")
-//	@NotNull(message="网关类型不能为空")
-//	public ResultBean<List<byte[]>> getSubscribedContracts(String gatewayId){
-//		return new ResultBean<>(gatewayService.getSubscribedContracts(gatewayId));
-//	}
+	@GetMapping("/settings")
+	@NotNull(message="网关类型不能为空")
+	public ResultBean<List<ComponentField>> getGatewaySettingsMetaInfo(String gatewayType){
+		return new ResultBean<>(gatewayService.getGatewaySettingsMetaInfo(gatewayType));
+	}
 	
 	@GetMapping("/types")
 	public ResultBean<Collection<GatewayTypeDescription>> gatewayTypeOptions(){

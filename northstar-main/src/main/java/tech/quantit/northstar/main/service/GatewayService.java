@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
+import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleDescription;
@@ -262,6 +263,11 @@ public class GatewayService implements InitializingBean {
 		}
 	}
 	
+	public List<ComponentField> getGatewaySettingsMetaInfo(String gatewayType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		List<GatewayDescription> result = gatewayRepo.findAll();
@@ -275,4 +281,6 @@ public class GatewayService implements InitializingBean {
 			doCreateGateway(gd);
 		}
 	}
+
+	
 }
