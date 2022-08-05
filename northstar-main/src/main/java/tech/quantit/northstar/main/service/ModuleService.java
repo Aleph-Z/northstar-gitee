@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -17,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.common.constant.GatewayType;
 import tech.quantit.northstar.common.constant.ModuleState;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
@@ -184,8 +185,8 @@ public class ModuleService implements InitializingBean {
 		ModuleRuntimeDescription mrd = moduleRepo.findRuntimeByName(md.getModuleName());
 		int daysOfDataForPreparation = md.getDaysOfDataForPreparation();
 		int year = LocalDate.now().getYear();
-		List<LocalDate> datesLastYear = mdRepo.findHodidayInLaw(GatewayType.CTP, year - 1);
-		List<LocalDate> datesThisYear = mdRepo.findHodidayInLaw(GatewayType.CTP, year);
+		List<LocalDate> datesLastYear = mdRepo.findHodidayInLaw("CTP", year - 1);
+		List<LocalDate> datesThisYear = mdRepo.findHodidayInLaw("CTP", year);
 		Set<LocalDate> holidays = new HashSet<>();
 		holidays.addAll(datesLastYear);
 		holidays.addAll(datesThisYear);
@@ -276,13 +277,17 @@ public class ModuleService implements InitializingBean {
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for(ModuleDescription md : findAllModules()) {
-			try {				
-				loadModule(md);
-			} catch (ClassNotFoundException e) {
-				log.warn("模组 [{}] 加载失败，找不到相应的类", md.getModuleName(), e);
+		CompletableFuture.runAsync(() -> {
+			log.info("正在加载模组");
+			for(ModuleDescription md : findAllModules()) {
+				try {				
+					loadModule(md);
+				} catch (Exception e) {
+					log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
+				}
 			}
-		}
+		}, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
+		
 	}
 	
 }

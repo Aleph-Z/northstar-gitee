@@ -1,5 +1,6 @@
 package tech.quantit.northstar.strategy.api.demo;
 
+import tech.quantit.northstar.common.constant.FieldType;
 import tech.quantit.northstar.common.constant.SignalOperation;
 import tech.quantit.northstar.common.model.DynamicParams;
 import tech.quantit.northstar.common.model.Setting;
@@ -133,15 +134,15 @@ public class IndicatorSampleStrategy extends AbstractStrategy	// 为了简化代
 		this.bollMid = ctx.newIndicator("BOLL_MID",params.indicatorSymbol,params.n, Indicator.ValueType.CLOSE,Boll.of(params.n, params.x).mid());
 	}
 
-	public static class InitParams extends DynamicParams {
-
-		@Setting(value="指标合约", order=0)
+	public static class InitParams extends DynamicParams {			
+		
+		@Setting(label="指标合约", order=0)
 		private String indicatorSymbol;
-
-		@Setting(value="快线周期", order=1)
-		private int fast;
-
-		@Setting(value="慢线周期", order=2)
+		
+		@Setting(label="快线周期", type = FieldType.NUMBER, order=1)		
+		private int fast;						
+		
+		@Setting(label="慢线周期", type = FieldType.NUMBER, order=2)		
 		private int slow;
 
 		@Setting(value="Boll统计天数", order=3)
