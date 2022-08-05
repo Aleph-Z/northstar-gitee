@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import tech.quantit.northstar.common.IContractManager;
 import tech.quantit.northstar.common.constant.GatewayUsage;
 import tech.quantit.northstar.common.exception.NoSuchElementException;
 import tech.quantit.northstar.common.model.ComponentField;
@@ -32,6 +33,7 @@ import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.gateway.api.MarketGateway;
 import tech.quantit.northstar.gateway.sim.trade.SimTradeGateway;
 import tech.quantit.northstar.main.utils.CodecUtils;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 网关服务
@@ -49,6 +51,8 @@ public class GatewayService implements InitializingBean {
 	private GatewayTypeProvider gatewayTypeProvider;
 	
 	private GatewaySettingsMetaInfoProvider gatewaySettingsProvider;
+	
+	private IContractManager contractMgr;
 	
 	private IGatewayRepository gatewayRepo;
 	
@@ -267,8 +271,30 @@ public class GatewayService implements InitializingBean {
 		}
 	}
 	
+	/**
+	 * 网关配置元信息
+	 * @param gatewayType
+	 * @return
+	 */
 	public Collection<ComponentField> getGatewaySettingsMetaInfo(String gatewayType) {
 		return gatewaySettingsProvider.getSettings(gatewayType);
+	}
+	
+	/**
+	 * 网关已订阅合约
+	 * @param gatewayId
+	 * @return
+	 */
+	public List<ContractField> getSubscribedContractList(String gatewayId){
+		GatewayDescription gd = gatewayRepo.findById(gatewayId);
+		if(gd == null) {
+			throw new NoSuchElementException("没有找到网关：" + gatewayId);
+		}
+		List<String> subContractDefIds = gd.getSubscribedContractGroups();
+		return subContractDefIds.stream()
+				.map(defId -> contractMgr.relativeContracts(defId))
+				.flatMap(Collection::stream)
+				.toList();
 	}
 	
 	@Override

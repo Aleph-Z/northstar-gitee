@@ -31,10 +31,10 @@ public class ContractController {
 
 	@GetMapping("/defs")
 	@NotNull(message="合约类别名称不能为空")
-	public ResponseEntity<ResultBean<List<ContractDefinition>>> getContractDefinitions(String name){
+	public ResponseEntity<ResultBean<List<ContractDefinition>>> getContractDefinitions(String provider){
 		return ResponseEntity.ok()
 			      .cacheControl(cacheControl)
-			      .body(new ResultBean<>(service.getContractDefinitions(name)));
+			      .body(new ResultBean<>(service.getContractDefinitions(provider)));
 	}
 	
 	@GetMapping("/providers")
@@ -47,17 +47,8 @@ public class ContractController {
 	
 	@GetMapping("/list")
 	@NotNull(message="合约类别名称不能为空")
-	public ResultBean<List<byte[]>> getContractList(String name){
-		return new ResultBean<>(service.getContractList(name)
-				.stream()
-				.map(ContractField::toByteArray)
-				.toList());
-	}
-	
-	@GetMapping("/sub")
-	@NotNull(message="网关ID不能为空")
-	public ResultBean<List<byte[]>> getSubscribedContractList(String gatewayId){
-		return new ResultBean<>(service.getSubscribedContractList(gatewayId)
+	public ResultBean<List<byte[]>> getContractList(String provider){
+		return new ResultBean<>(service.getContractList(provider)
 				.stream()
 				.map(ContractField::toByteArray)
 				.toList());

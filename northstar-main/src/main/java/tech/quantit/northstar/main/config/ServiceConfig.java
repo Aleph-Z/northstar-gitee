@@ -58,8 +58,8 @@ public class ServiceConfig {
 	@Bean
 	public GatewayService gatewayService(GatewayAndConnectionManager gatewayConnMgr, IGatewayRepository gatewayRepo, IMarketDataRepository mdRepo,
 			IPlaybackRuntimeRepository playbackRtRepo, IModuleRepository moduleRepo, ISimAccountRepository simAccRepo, GatewayTypeProvider gtp,
-			GatewaySettingsMetaInfoProvider settingsPvd) {
-		return new GatewayService(gatewayConnMgr, gtp, settingsPvd, gatewayRepo, mdRepo, simAccRepo, playbackRtRepo, moduleRepo);
+			GatewaySettingsMetaInfoProvider settingsPvd, IContractManager contractMgr) {
+		return new GatewayService(gatewayConnMgr, gtp, settingsPvd, contractMgr, gatewayRepo, mdRepo, simAccRepo, playbackRtRepo, moduleRepo);
 	}
 	
 	@Bean

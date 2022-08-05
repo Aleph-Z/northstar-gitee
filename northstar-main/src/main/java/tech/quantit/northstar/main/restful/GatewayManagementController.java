@@ -24,6 +24,7 @@ import tech.quantit.northstar.common.model.ResultBean;
 import tech.quantit.northstar.domain.gateway.ContractManager;
 import tech.quantit.northstar.gateway.api.GatewayTypeProvider;
 import tech.quantit.northstar.main.service.GatewayService;
+import xyz.redtorch.pb.CoreField.ContractField;
 
 @RequestMapping("/northstar/gateway")
 @RestController
@@ -109,6 +110,15 @@ public class GatewayManagementController {
 		return new ResultBean<>(gatewayTypeProvider.getAll()
 				.stream()
 				.map(GatewayTypeDescription::new)
+				.toList());
+	}
+	
+	@GetMapping("/sub")
+	@NotNull(message="网关ID不能为空")
+	public ResultBean<List<byte[]>> getSubscribedContractList(String gatewayId){
+		return new ResultBean<>(gatewayService.getSubscribedContractList(gatewayId)
+				.stream()
+				.map(ContractField::toByteArray)
 				.toList());
 	}
 }
