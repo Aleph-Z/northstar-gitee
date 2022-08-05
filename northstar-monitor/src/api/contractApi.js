@@ -2,10 +2,10 @@ import baseService from './baseRequest'
 
 export default {
     getContractDefs(providerName){
-        return baseService.get(`/contract/defs?name=${providerName}`)
+        return baseService.get(`/contract/defs?provider=${providerName}`)
     },
     getContractList(providerName){
-        return baseService.get(`/contract/list?name=${providerName}`)
+        return baseService.get(`/contract/list?provider=${providerName}`)
     },
     getContractProviders(gatewayType){
         return baseService.get(`/contract/providers?gatewayType=${gatewayType}`)

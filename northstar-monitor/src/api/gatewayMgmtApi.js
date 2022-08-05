@@ -36,5 +36,8 @@ export default {
   },
   getGatewaySettingsMetaInfo(gatewayType){
     return baseService.get('/gateway/settings?gatewayType=' + gatewayType)
-  }
+  },
+  getSubscribedContractList(gatewayId){
+    return baseService.get(`/gateway/sub?gatewayId=${gatewayId}`)
+  },
 }
