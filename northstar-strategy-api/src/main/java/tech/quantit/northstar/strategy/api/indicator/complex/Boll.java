@@ -1,5 +1,4 @@
-package tech.quantit.northstar.strategy.api.indicator.function;
-
+package tech.quantit.northstar.strategy.api.indicator.complex;
 
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
@@ -8,30 +7,36 @@ import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunc
 
 public final class Boll {
 
-    private  int n;
+    private int x;
+    private int n;
 
-    private  int x;
-
-    private TimeSeriesUnaryOperator ma;
-
-    private TimeSeriesUnaryOperator std;
-
-    private Boll(int n, int x) {
-        this.n = n;
+    /**
+     * 创建一个布林线生成器
+     * @param n		代表均线周期
+     * @param x		代表标准差倍数
+     */
+    public Boll(int n, int x) {
         this.x = x;
-        this.ma = MA(n);
-        this.std = STD(n);
+        this.n = n;
     }
 
-    private static Boll create(int n , int x){
-        return new Boll(n,x);
-    }
-
+    /**
+     * 创建一个布林线生成器
+     * @param n		代表均线周期
+     * @param x		代表标准差倍数
+     * @return
+     */
     public static Boll of(int n, int x){
-        return create(n, x);
+        return new Boll(n, x);
     }
 
+    /**
+     * 获取上轨线生成函数
+     * @return
+     */
     public TimeSeriesUnaryOperator upper(){
+    	final TimeSeriesUnaryOperator ma = MA(n);
+    	final TimeSeriesUnaryOperator std = STD(n);
         return tv -> {
             TimeSeriesValue v = ma.apply(tv);
             TimeSeriesValue v0 = std.apply(tv);
@@ -40,7 +45,13 @@ public final class Boll {
         };
     }
 
+    /**
+     * 获取下轨线生成函数
+     * @return
+     */
     public TimeSeriesUnaryOperator lower(){
+    	final TimeSeriesUnaryOperator ma = MA(n);
+    	final TimeSeriesUnaryOperator std = STD(n);
         return tv -> {
             TimeSeriesValue v = ma.apply(tv);
             TimeSeriesValue v0 = std.apply(tv);
@@ -49,11 +60,12 @@ public final class Boll {
         };
     }
 
+    /**
+     * 获取中轨线生成函数
+     * @return
+     */
     public TimeSeriesUnaryOperator mid(){
-        return tv -> {
-            TimeSeriesValue v = ma.apply(tv);
-            return v;
-        };
+        return MA(n);
     }
 
 }

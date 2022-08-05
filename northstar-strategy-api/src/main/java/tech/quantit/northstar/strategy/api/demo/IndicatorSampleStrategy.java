@@ -8,11 +8,12 @@ import tech.quantit.northstar.strategy.api.TradeStrategy;
 import tech.quantit.northstar.strategy.api.annotation.StrategicComponent;
 import tech.quantit.northstar.strategy.api.constant.PriceType;
 import tech.quantit.northstar.strategy.api.indicator.Indicator;
+import tech.quantit.northstar.strategy.api.indicator.complex.Boll;
+
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.STD;
 import static tech.quantit.northstar.strategy.api.indicator.function.FunctionCompute.*;
 
-import tech.quantit.northstar.strategy.api.indicator.function.Boll;
 import xyz.redtorch.pb.CoreField.BarField;
 import xyz.redtorch.pb.CoreField.TickField;
 

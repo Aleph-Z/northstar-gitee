@@ -81,7 +81,6 @@ public interface AverageFunctions {
 		final double[] values = new double[size];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble sumOfValues = new AtomicDouble();
-		System.out.println("------------values："+values.length);
 		return tv -> {
 			long timestamp = tv.getTimestamp();
 			double val = tv.getValue();
