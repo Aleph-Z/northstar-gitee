@@ -46,39 +46,4 @@ public interface FunctionCompute {
 		};
 	}
 
-	/**
-	 * 布林上轨
-	 * @param mid
-	 * @param std
-	 * @param k
-	 * @return
-	 */
-	static TimeSeriesUnaryOperator upper(TimeSeriesUnaryOperator mid, TimeSeriesUnaryOperator std ,int k){
-		Objects.requireNonNull(mid);
-		Objects.requireNonNull(std);
-		return tv -> {
-			TimeSeriesValue v = mid.apply(tv);
-			TimeSeriesValue v0 = std.apply(tv);
-			v.setValue(v.getValue() + k * v0.getValue());
-			return v;
-		};
-	}
-
-	/**
-	 * 布林下轨
-	 * @param mid
-	 * @param std
-	 * @param k
-	 * @return
-	 */
-	static TimeSeriesUnaryOperator lower(TimeSeriesUnaryOperator mid, TimeSeriesUnaryOperator std ,int k){
-		Objects.requireNonNull(mid);
-		Objects.requireNonNull(std);
-		return tv -> {
-			TimeSeriesValue v = mid.apply(tv);
-			TimeSeriesValue v0 = std.apply(tv);
-			v.setValue(v.getValue() - k * v0.getValue());
-			return v;
-		};
-	}
 }

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreField.BarField;
@@ -80,7 +81,6 @@ public interface AverageFunctions {
 		final double[] values = new double[size];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble sumOfValues = new AtomicDouble();
-		System.out.println("------------values："+values.length);
 		return tv -> {
 			long timestamp = tv.getTimestamp();
 			double val = tv.getValue();
@@ -100,25 +100,15 @@ public interface AverageFunctions {
 	 * @param size
 	 * @return
 	 */
-	static TimeSeriesUnaryOperator STD(TimeSeriesUnaryOperator ma,int size){
+	static TimeSeriesUnaryOperator STD(int size){
 		final double[] values = new double[size];
 		final AtomicInteger cursor = new AtomicInteger();
-		final AtomicDouble sumOfValues = new AtomicDouble();
 		return tv ->{
-			TimeSeriesValue applyMA =ma.apply(tv);
 			long timestamp = tv.getTimestamp();
-			double val = tv.getValue();
-			double oldVal = values[cursor.get()];
-			values[cursor.get()] = val;
+			values[cursor.get()] = tv.getValue();
 			cursor.set(cursor.incrementAndGet() % size);
-			/**
-			 * 平方差计算方法  前20个值 和 20值平均之间的差  (close - ma20)平方,通过交换法 先 等于close的平方 减ma20的平方
-			 */
-			sumOfValues.addAndGet(Math.pow(val,2) - Math.pow(oldVal,2));
-			val = ( sumOfValues.get() - (Math.pow(applyMA.getValue(),2) * size) ) ;
-			//求平均值并且开平方
-			val = Math.sqrt(val / size);
-			return new TimeSeriesValue(val, timestamp);
+			double variance = new StandardDeviation().evaluate(values);
+			return new TimeSeriesValue(variance, timestamp);
 		};
 	}
 }
