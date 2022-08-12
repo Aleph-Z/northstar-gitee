@@ -1,18 +1,17 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
+import com.google.common.util.concurrent.AtomicDouble;
+import org.apache.commons.lang3.StringUtils;
+import tech.quantit.northstar.common.model.TimeSeriesValue;
+import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
+import xyz.redtorch.pb.CoreField.BarField;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.util.concurrent.AtomicDouble;
-
-import tech.quantit.northstar.common.model.TimeSeriesValue;
-import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
-import xyz.redtorch.pb.CoreField.BarField;
 
 /**
  * 均线函数
@@ -74,6 +73,31 @@ public interface AverageFunctions {
 			return new TimeSeriesValue(weightedSum, bar.getActionTimestamp());
 		};
 	}
+
+	/**
+	 * RSV:=(CLOSE-LLV(LOW,N))/(HHV(HIGH,N)-LLV(LOW,N))*100;
+	 * 收盘价与N周期最低值做差，N周期最高值与N周期最低值做差，两差之间做比值
+	 * @param n		统计范围
+	 * @return		返回计算函数
+	 */
+	static Function<BarField, TimeSeriesValue> RSV(int n){
+		final double[] lowArr = new double[n];
+		final double[] highArr = new double[n];
+		final AtomicInteger index = new AtomicInteger(0);
+		return bar -> {
+			int i = index.get();
+			lowArr[i] = bar.getLowPrice();
+			highArr[i] = bar.getHighPrice();
+			index.set(++i % n);
+			double lowest = DoubleStream.of(lowArr).min().orElse(0);
+			if(lowest == 0) {
+				return new TimeSeriesValue(0, bar.getActionTimestamp());
+			}
+			double highest = DoubleStream.of(highArr).max().orElse(0);
+			double rsv = (bar.getClosePrice() - lowest) / (highest - lowest) * 100;
+			return new TimeSeriesValue(rsv, bar.getActionTimestamp());
+		};
+	}
 	
 	/**
 	 * 指数加权平均EMA函数
@@ -94,6 +118,28 @@ public interface AverageFunctions {
 				hasInitVal.set(true);
 			}
 			return new TimeSeriesValue(ema.get(), timestamp);
+		};
+	}
+
+	/**
+	 * 简单移动平均SMA函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
+	 */
+	static TimeSeriesUnaryOperator SMA(int n, int m) {
+		final AtomicDouble sma = new AtomicDouble();
+		final AtomicBoolean hasInitVal = new AtomicBoolean();
+		final double factor = (double) m / n;
+		return tv -> {
+			double val = tv.getValue();
+			long timestamp = tv.getTimestamp();
+			if(hasInitVal.get()) {
+				sma.set(factor * val + (1 - factor) * sma.get());
+			} else {
+				sma.set(val);
+				hasInitVal.set(true);
+			}
+			return new TimeSeriesValue(sma.get(), timestamp);
 		};
 	}
 
