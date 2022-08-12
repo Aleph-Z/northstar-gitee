@@ -6,8 +6,9 @@ import xyz.redtorch.pb.CoreField.BarField;
 
 import java.util.function.Function;
 
-import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.RSV;
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.SMA;
+import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.HHV;
+import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.LLV;
 
 /**
  * N,M1,M2为KDJ指标参数
@@ -48,13 +49,20 @@ public class KDJ {
 	
 	/**
 	 * 获取K值计算函数
+	 * RSV:=(CLOSE-LLV(LOW,N))/(HHV(HIGH,N)-LLV(LOW,N))*100;//收盘价与N周期最低值做差，N周期最高值与N周期最低值做差，两差之间做比值。
 	 * K=SMA(RSV,M1,1);//RSV的M1日移动平均值，1为权重
 	 * @return
 	 */
 	public Function<BarField, TimeSeriesValue> k() {
-		final Function<BarField, TimeSeriesValue> rsv = RSV(this.n);
+		final TimeSeriesUnaryOperator llv = LLV(this.n);
+		final TimeSeriesUnaryOperator hhv = HHV(this.n);
 		final TimeSeriesUnaryOperator sma = SMA(this.n, this.m1);
-		return bar -> sma.apply(rsv.apply(bar));
+		return bar -> {
+			TimeSeriesValue lowV = llv.apply(new TimeSeriesValue(bar.getLowPrice(), bar.getActionTimestamp()));
+			TimeSeriesValue highV = hhv.apply(new TimeSeriesValue(bar.getHighPrice(), bar.getActionTimestamp()));
+			double rsv = (bar.getClosePrice() - lowV.getValue()) / (highV.getValue() - lowV.getValue()) * 100;
+			return sma.apply(new TimeSeriesValue(rsv, bar.getActionTimestamp()));
+		};
 	}
 
 	/**
