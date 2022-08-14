@@ -1,32 +1,29 @@
 package tech.quantit.northstar.strategy.api.indicator.function;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.util.concurrent.AtomicDouble;
-
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.lang3.StringUtils;
 import tech.quantit.northstar.common.model.TimeSeriesValue;
 import tech.quantit.northstar.strategy.api.indicator.TimeSeriesUnaryOperator;
 import xyz.redtorch.pb.CoreField.BarField;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
+import java.util.stream.LongStream;
+
 /**
  * 均线函数
+ * 函数名称为了与业界实践保持一致，并没有僵硬地采用驼峰命名规范，而是遵循业界常用命名
  * @author KevinHuangwl
  *
  */
 public interface AverageFunctions {
 
 	/**
-	 * 当日成交量加权均价（当日结算价）
+	 * 当日成交量加权均价（当日结算价）函数
 	 * 注意：该算法与交易所的结算价存在一定误差，主要因为该算法是按K线计算，K线周期越小，误差越小
-	 * @param
-	 * @param
-	 * @return
+	 * @return		返回计算函数
 	 */
 	static Function<BarField, TimeSeriesValue> SETTLE(){
 		final AtomicDouble weightPrice = new AtomicDouble();
@@ -49,16 +46,42 @@ public interface AverageFunctions {
 			return new TimeSeriesValue(value, bar.getActionTimestamp());
 		};
 	}
+	
+	/**
+	 * N周期内的成交量加权均价函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
+	 */
+	static Function<BarField, TimeSeriesValue> SETTLE(int n){
+		final long[] volArr = new long[n];
+		final double[] priceArr = new double[n];
+		final AtomicInteger index = new AtomicInteger(0);
+		return bar -> {
+			int i = index.get();
+			volArr[i] = bar.getVolumeDelta();
+			priceArr[i] = (bar.getClosePrice() * 2 + bar.getHighPrice() + bar.getLowPrice()) / 4;	// 利用K线重心为计算依据
+			index.set(++i % n);
+			long total = LongStream.of(volArr).sum();
+			if(total == 0) {
+				return new TimeSeriesValue(0, bar.getActionTimestamp());
+			}
+			double weightedSum = 0;
+			for(int j=0; j<n; j++) {
+				weightedSum += priceArr[j] * volArr[j] / total;
+			}
+			return new TimeSeriesValue(weightedSum, bar.getActionTimestamp());
+		};
+	}
 
 	/**
-	 * 指数加权平均EMA
-	 * @param size
-	 * @return
+	 * 指数加权平均EMA函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
 	 */
-	static TimeSeriesUnaryOperator EMA(int size) {
+	static TimeSeriesUnaryOperator EMA(int n) {
 		final AtomicDouble ema = new AtomicDouble();
 		final AtomicBoolean hasInitVal = new AtomicBoolean();
-		final double factor = 2D / (size + 1);
+		final double factor = 2D / (n + 1);
 		return tv -> {
 			double val = tv.getValue();
 			long timestamp = tv.getTimestamp();
@@ -73,12 +96,35 @@ public interface AverageFunctions {
 	}
 
 	/**
-	 * 简单移动平均MA
-	 * @param size
-	 * @return
+	 * 扩展指数加权移动平均SMA函数
+	 * @param n		统计范围
+	 * @param m		权重
+	 * @return		返回计算函数
 	 */
-	static TimeSeriesUnaryOperator MA(int size) {
-		final double[] values = new double[size];
+	static TimeSeriesUnaryOperator SMA(int n, int m) {
+		final AtomicDouble sma = new AtomicDouble();
+		final AtomicBoolean hasInitVal = new AtomicBoolean();
+		final double factor = (double) m / n;
+		return tv -> {
+			double val = tv.getValue();
+			long timestamp = tv.getTimestamp();
+			if(hasInitVal.get()) {
+				sma.set(factor * val + (1 - factor) * sma.get());
+			} else {
+				sma.set(val);
+				hasInitVal.set(true);
+			}
+			return new TimeSeriesValue(sma.get(), timestamp);
+		};
+	}
+
+	/**
+	 * 简单移动平均MA函数
+	 * @param n		统计范围
+	 * @return		返回计算函数
+	 */
+	static TimeSeriesUnaryOperator MA(int n) {
+		final double[] values = new double[n];
 		final AtomicInteger cursor = new AtomicInteger();
 		final AtomicDouble sumOfValues = new AtomicDouble();
 		return tv -> {
@@ -86,29 +132,11 @@ public interface AverageFunctions {
 			double val = tv.getValue();
 			double oldVal = values[cursor.get()];
 			values[cursor.get()] = val;
-			cursor.set(cursor.incrementAndGet() % size);
+			cursor.set(cursor.incrementAndGet() % n);
 			sumOfValues.addAndGet(val - oldVal);
-			val = sumOfValues.get() / size;
+			val = sumOfValues.get() / n;
 			return new TimeSeriesValue(val, timestamp);
 		};
 	}
 
-	/**
-	 * 函数：STD
-	 * 说明:估算标准差
-	 * 用法:STD(size)为收盘价的size日估算标准差
-	 * @param size
-	 * @return
-	 */
-	static TimeSeriesUnaryOperator STD(int size){
-		final double[] values = new double[size];
-		final AtomicInteger cursor = new AtomicInteger();
-		return tv ->{
-			long timestamp = tv.getTimestamp();
-			values[cursor.get()] = tv.getValue();
-			cursor.set(cursor.incrementAndGet() % size);
-			double variance = new StandardDeviation().evaluate(values);
-			return new TimeSeriesValue(variance, timestamp);
-		};
-	}
 }

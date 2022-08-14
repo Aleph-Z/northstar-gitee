@@ -35,10 +35,17 @@
                 :disabled="readOnly || isUpdateMode"
               ></el-input>
             </el-form-item>
-            <el-form-item value label="模组类型">
+            <el-form-item label="模组类型">
               <el-select v-model="form.type" :disabled="readOnly || isUpdateMode">
                 <el-option label="投机" value="SPECULATION"></el-option>
                 <el-option label="套利" value="ARBITRAGE"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="模组用途">
+              <el-select v-model="form.usage" :disabled="readOnly || isUpdateMode">
+                <el-option label="回测" value="PLAYBACK"></el-option>
+                <el-option label="模拟盘" value="UAT"></el-option>
+                <el-option label="实盘" value="PROD"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="绑定合约">
@@ -52,34 +59,26 @@
               </el-tooltip>
             </el-form-item>
             <el-form-item label="平仓优化">
-              <el-select v-model="form.closingPolicy" :disabled="readOnly">
+              <el-select v-model="form.closingPolicy" :disabled="readOnly || form.usage !== 'PROD'">
                 <el-option label="先开先平" value="FIFO"></el-option>
                 <el-option label="平今优先" value="PRIOR_TODAY"></el-option>
                 <el-option label="平昨锁今" value="PRIOR_BEFORE_HEGDE_TODAY"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="K线周期">
-              <el-input-number
-                :disabled="readOnly || isUpdateMode"
-                v-model="form.numOfMinPerBar"
-                :min="1"
-              />
+              <el-input-number :disabled="readOnly" v-model="form.numOfMinPerBar" :min="1" />
               <span class="ml-10">分钟</span>
             </el-form-item>
             <el-form-item label="预热数据量">
               <el-input-number
                 v-model="form.daysOfDataForPreparation"
                 :min="0"
-                :disabled="readOnly || isUpdateMode"
+                :disabled="readOnly || form.usage === 'PLAYBACK'"
               />
               <span class="ml-10">天</span>
             </el-form-item>
             <el-form-item label="缓存数据量">
-              <el-input-number
-                :disabled="readOnly || isUpdateMode"
-                v-model="form.moduleCacheDataSize"
-                :min="100"
-              >
+              <el-input-number :disabled="readOnly" v-model="form.moduleCacheDataSize" :min="100">
               </el-input-number>
             </el-form-item>
           </div>
@@ -172,11 +171,21 @@
     </el-container>
 
     <div slot="footer" class="dialog-footer">
+      <el-popconfirm
+        v-if="!readOnly && isUpdateMode && form.usage !== 'PROD'"
+        class="mr-10"
+        title="确定重置吗？"
+        @confirm="saveSetting(true)"
+      >
+        <el-button slot="reference" size="mini" type="warning" title="模组状态将重置为初始状态">
+          重置模组
+        </el-button>
+      </el-popconfirm>
       <el-button v-if="!readOnly" type="primary" @click="contractFinderVisible = true">
         合约查询
       </el-button>
       <el-button @click="close">取 消</el-button>
-      <el-button v-if="!readOnly" type="primary" @click="saveSetting">保 存</el-button>
+      <el-button v-if="!readOnly" type="primary" @click="saveSetting(false)">保 存</el-button>
     </div>
   </el-dialog>
 </template>
@@ -224,8 +233,9 @@ export default {
       form: {
         moduleName: '',
         type: 'SPECULATION',
-        numOfMinPerBar: '1',
-        daysOfDataForPreparation: '0',
+        usage: 'UAT',
+        numOfMinPerBar: 1,
+        daysOfDataForPreparation: 0,
         moduleCacheDataSize: 500,
         closingPolicy: 'FIFO',
         moduleAccountSettingsDescription: [],
@@ -246,12 +256,10 @@ export default {
       return !!this.module
     }
   },
-  mounted() {
-    this.initData()
-  },
   watch: {
     visible: function (val) {
       if (val) {
+        this.initData()
         if (!this.module) {
           return
         }
@@ -265,6 +273,12 @@ export default {
           return item
         })
       }
+    },
+    'form.usage': function (val) {
+      if (val === 'PLAYBACK') {
+        this.form.daysOfDataForPreparation = 0
+      }
+      this.form.closingPolicy = 'FIFO'
     }
   },
   methods: {
@@ -277,7 +291,11 @@ export default {
       })
       moduleApi.getStrategies().then((strategyMetas) => {
         strategyMetas.forEach(async (i) => initComponent(i, this.tradeStrategyOptions))
-        this.tradeStrategyOptions.sort((a, b) => a.value.localeCompare(b.value))
+        setTimeout(() => {
+          this.tradeStrategyOptions = this.tradeStrategyOptions.sort((a, b) =>
+            a.value.localeCompare(b.value)
+          )
+        }, 500)
       })
     },
     handleSelect(index) {
@@ -294,7 +312,7 @@ export default {
         }
       })
     },
-    saveSetting() {
+    async saveSetting(reset) {
       let pass =
         this.assertTrue(this.form.moduleName, '未指定模组名称') &&
         this.assertTrue(this.form.type, '未指定模组类型') &&
@@ -312,14 +330,15 @@ export default {
         }
       })
 
+      await moduleApi.validateModule(this.form)
+
       const obj = Object.assign({}, this.form)
-      this.$emit('onSave', obj)
+      this.$emit(reset ? 'onReset' : 'onSave', obj)
       this.close()
     },
     close() {
       this.activeIndex = '1'
       Object.assign(this.$data, this.$options.data())
-      this.$nextTick(this.initData)
       this.$emit('update:visible', false)
     },
     assertTrue(expression, errMsg) {

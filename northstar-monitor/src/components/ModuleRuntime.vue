@@ -14,9 +14,19 @@
     <div class="module-rt-wrapper">
       <div class="side-panel">
         <div class="description-wrapper">
-          <el-descriptions class="margin-top" title="模组信息" :column="3">
+          <el-descriptions class="margin-top" :column="3">
+            <template slot="title">
+              模组信息
+              <el-tag
+                class="ml-10"
+                :type="{ PLAYBACK: 'info', UAT: 'warning', PROD: '' }[module.usage]"
+                effect="dark"
+                >{{ { PLAYBACK: '回测', UAT: '模拟盘', PROD: '实盘' }[module.usage] }}</el-tag
+              >
+            </template>
             <template slot="extra">
               <el-switch
+                class="ml-10"
                 v-model="isManualUpdate"
                 inactive-text="自动刷新"
                 active-color="#D8DBE1"
@@ -93,6 +103,9 @@
                     | formatter
                 }}
               </el-descriptions-item>
+              <el-descriptions-item label="交易笔数">
+                {{ accountDealRecords.length || 0 }}
+              </el-descriptions-item>
             </el-descriptions>
             <el-tabs v-model="moduleTab" :stretch="true">
               <el-tab-pane name="holding" label="模组持仓"></el-tab-pane>
@@ -136,7 +149,11 @@
                 <el-table-column prop="volume" label="手数" align="center" width="46px" />
                 <el-table-column prop="openPrice" label="开仓价" align="center" />
                 <el-table-column prop="closePrice" label="平仓价" align="center" />
-                <el-table-column prop="dealProfit" label="平仓盈亏" align="center" width="70px" />
+                <el-table-column prop="dealProfit" label="平仓盈亏" align="center" width="70px">
+                  <template slot-scope="scope">
+                    {{ scope.row.dealProfit | formatter }}
+                  </template>
+                </el-table-column>
                 <el-table-column prop="tradingDay" label="交易日" align="center" width="100px" />
               </el-table>
             </div>
@@ -144,7 +161,9 @@
         </div>
       </div>
       <div class="kline-wrapper">
-        <div class="kline-header">模组当前引用的K线数据（模组仅缓存最近的500根K线数据）</div>
+        <div class="kline-header">
+          模组当前引用的K线数据（模组仅缓存最近的{{ module.moduleCacheDataSize }}根K线数据）
+        </div>
         <div>
           <el-select class="ml-10 mt-5" v-model="unifiedSymbolOfChart" placeholder="请选择合约">
             <el-option

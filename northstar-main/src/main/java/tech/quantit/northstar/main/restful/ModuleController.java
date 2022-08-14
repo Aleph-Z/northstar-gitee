@@ -56,14 +56,25 @@ public class ModuleController {
 	}
 	
 	/**
+	 * 校验模组配置
+	 * @param module
+	 * @return
+	 */
+	@PostMapping("/validate")
+	@NotNull(message = "模组不能为空")
+	public ResultBean<Boolean> validateModuleSettings(@RequestBody ModuleDescription module){
+		return new ResultBean<>(service.validateModule(module));
+	}
+	
+	/**
 	 * 创建模组
 	 * @param module
 	 * @return		返回更新后实体
 	 * @throws Exception
 	 */
 	@PostMapping
-	public ResultBean<ModuleDescription> createModule(@NotNull @RequestBody ModuleDescription module) throws Exception{
-		Assert.notNull(module, "模组不能为空");
+	@NotNull(message = "模组不能为空")
+	public ResultBean<ModuleDescription> createModule(@RequestBody ModuleDescription module) throws Exception{
 		return new ResultBean<>(service.createModule(module));
 	}
 	
@@ -74,9 +85,9 @@ public class ModuleController {
 	 * @throws Exception
 	 */
 	@PutMapping
-	public ResultBean<ModuleDescription> updateModule(@NotNull @RequestBody ModuleDescription module) throws Exception{
-		Assert.notNull(module, "模组不能为空");
-		return new ResultBean<>(service.modifyModule(module));
+	@NotNull(message = "模组不能为空")
+	public ResultBean<ModuleDescription> updateModule(@RequestBody ModuleDescription module, boolean reset) throws Exception{
+		return new ResultBean<>(service.modifyModule(module, reset));
 	}
 	
 	/**
@@ -94,7 +105,8 @@ public class ModuleController {
 	 * @return		返回删除结果提示
 	 */
 	@DeleteMapping
-	public ResultBean<Boolean> removeModule(@NotNull String name){
+	@NotNull(message = "模组名称不能为空")
+	public ResultBean<Boolean> removeModule(String name){
 		return new ResultBean<>(service.removeModule(name));
 	}
 	
@@ -104,7 +116,8 @@ public class ModuleController {
 	 * @return	返回更新后状态
 	 */
 	@GetMapping("/toggle")
-	public ResultBean<Boolean> toggleModuleState(@NotNull String name){
+	@NotNull(message = "模组名称不能为空")
+	public ResultBean<Boolean> toggleModuleState(String name){
 		return new ResultBean<>(service.toggleModule(name));
 	}
 	
@@ -114,7 +127,8 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/rt/info")
-	public ResultBean<ModuleRuntimeDescription> getModuleRealTimeInfo(@NotNull String name){
+	@NotNull(message = "模组名称不能为空")
+	public ResultBean<ModuleRuntimeDescription> getModuleRealTimeInfo(String name){
 		return new ResultBean<>(service.getModuleRealTimeInfo(name));
 	}
 	
@@ -124,7 +138,8 @@ public class ModuleController {
 	 * @return
 	 */
 	@GetMapping("/deal/records")
-	public ResultBean<List<ModuleDealRecord>> getDealRecords(@NotNull String name){
+	@NotNull(message = "模组名称不能为空")
+	public ResultBean<List<ModuleDealRecord>> getDealRecords(String name){
 		return new ResultBean<>(service.getDealRecords(name));
 	}
 	

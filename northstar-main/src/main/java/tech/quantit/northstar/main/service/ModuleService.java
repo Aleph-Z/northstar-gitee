@@ -2,29 +2,32 @@ package tech.quantit.northstar.main.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.hutool.core.date.LocalDateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.common.constant.ModuleState;
+import tech.quantit.northstar.common.constant.ModuleUsage;
 import tech.quantit.northstar.common.event.NorthstarEvent;
 import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.ComponentField;
 import tech.quantit.northstar.common.model.ComponentMetaInfo;
 import tech.quantit.northstar.common.model.DynamicParams;
+import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.common.model.MockTradeDescription;
 import tech.quantit.northstar.common.model.ModuleAccountDescription;
 import tech.quantit.northstar.common.model.ModuleAccountRuntimeDescription;
@@ -34,6 +37,7 @@ import tech.quantit.northstar.common.model.ModulePositionDescription;
 import tech.quantit.northstar.common.model.ModuleRuntimeDescription;
 import tech.quantit.northstar.common.utils.ContractUtils;
 import tech.quantit.northstar.common.utils.MarketDataLoadingUtils;
+import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMarketDataRepository;
 import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.domain.gateway.ContractManager;
@@ -61,6 +65,8 @@ public class ModuleService implements InitializingBean {
 	
 	private ContractManager contractMgr;
 	
+	private IGatewayRepository gatewayRepo;
+	
 	private IModuleRepository moduleRepo;
 	
 	private IMarketDataRepository mdRepo;
@@ -71,11 +77,12 @@ public class ModuleService implements InitializingBean {
 	
 	private ExternalJarClassLoader extJarLoader;
 	
-	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IModuleRepository moduleRepo, IMarketDataRepository mdRepo,
-			ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
+	public ModuleService(ApplicationContext ctx, ExternalJarClassLoader extJarLoader, IGatewayRepository gatewayRepo, IModuleRepository moduleRepo,
+			IMarketDataRepository mdRepo, ModuleFactory moduleFactory, ModuleManager moduleMgr, ContractManager contractMgr) {
 		this.ctx = ctx;
 		this.moduleMgr = moduleMgr;
 		this.contractMgr = contractMgr;
+		this.gatewayRepo = gatewayRepo;
 		this.moduleRepo = moduleRepo;
 		this.mdRepo = mdRepo;
 		this.moduleFactory = moduleFactory;
@@ -121,6 +128,49 @@ public class ModuleService implements InitializingBean {
 	}
 	
 	/**
+	 * 校验模组配置
+	 * @param md
+	 * @return
+	 */
+	public boolean validateModule(ModuleDescription md) {
+		for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
+			// 校验模组绑定合约是已订阅合约
+			GatewayDescription accountGatewayDescription = gatewayRepo.findById(mad.getAccountGatewayId());
+			GatewayDescription marketGatewayDescription = gatewayRepo.findById(accountGatewayDescription.getBindedMktGatewayId());
+			Set<String> subscribedUnifiedSymbols = marketGatewayDescription
+					.getSubscribedContractGroups()
+					.stream()
+					.map(contractMgr::relativeContracts)
+					.flatMap(Collection::stream)
+					.map(ContractField::getUnifiedSymbol)
+					.collect(Collectors.toSet());
+			for(String unifiedSymbol : mad.getBindedUnifiedSymbols()) {
+				if(!subscribedUnifiedSymbols.contains(unifiedSymbol)) {
+					throw new IllegalStateException(String.format("网关【%s】没有订阅合约【%s】", 
+							accountGatewayDescription.getBindedMktGatewayId(), unifiedSymbol));
+				}
+			}
+			
+			// 校验模组用途与配置吻合
+			if(md.getUsage() == ModuleUsage.PLAYBACK) {
+				Assert.isTrue(marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "回测模组应该采用【PLAYBACK】行情网关");
+				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "回测模组应该采用【SIM】账户网关");
+			}
+			if(md.getUsage() == ModuleUsage.UAT) {
+				Assert.isTrue(accountGatewayDescription.getGatewayType().equals("SIM"), "模拟盘模组应该采用【SIM】账户网关");
+			}
+			if(md.getUsage() == ModuleUsage.PROD) {
+				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("PLAYBACK"), "实盘模组不应该采用【PLAYBACK】行情网关");
+				Assert.isTrue(!marketGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】行情网关");
+				Assert.isTrue(!accountGatewayDescription.getGatewayType().equals("SIM"), "实盘模组不应该采用【SIM】账户网关");
+			}
+			
+		}
+		
+		return true;
+	}
+	
+	/**
 	 * 增加模组
 	 * @param md
 	 * @return
@@ -154,7 +204,11 @@ public class ModuleService implements InitializingBean {
 	 * @return
 	 * @throws Exception 
 	 */
-	public ModuleDescription modifyModule(ModuleDescription md) throws Exception {
+	public ModuleDescription modifyModule(ModuleDescription md, boolean reset) throws Exception {
+		if(reset) {
+			removeModule(md.getModuleName());
+			return createModule(md);
+		}
 		unloadModule(md.getModuleName());
 		loadModule(md);
 		moduleRepo.saveSettings(md);
@@ -201,8 +255,10 @@ public class ModuleService implements InitializingBean {
 		IModule module = moduleFactory.newInstance(md, mrd);
 		module.initModule();
 		log.info("模组[{}] 初始化数据起始计算日为：{}", md.getModuleName(), date);
+		LocalDate now = LocalDate.now();
 		// 模组数据初始化
-		while(LocalDate.now().isAfter(date)) {
+		while(md.getDaysOfDataForPreparation() > 0
+				&& LocalDateTimeUtil.weekOfYear(now) >= LocalDateTimeUtil.weekOfYear(date)) {
 			LocalDate start = utils.getFridayOfThisWeek(date.minusWeeks(1));
 			LocalDate end = utils.getFridayOfThisWeek(date);
 			for(ModuleAccountDescription mad : md.getModuleAccountSettingsDescription()) {
@@ -277,17 +333,15 @@ public class ModuleService implements InitializingBean {
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		CompletableFuture.runAsync(() -> {
-			log.info("正在加载模组");
-			for(ModuleDescription md : findAllModules()) {
-				try {				
-					loadModule(md);
-				} catch (Exception e) {
-					log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
-				}
+		log.info("正在加载模组");
+		for(ModuleDescription md : findAllModules()) {
+			try {				
+				loadModule(md);
+			} catch (Exception e) {
+				log.warn("模组 [{}] 加载失败", md.getModuleName(), e);
 			}
-		}, CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS));
+		}
 		
 	}
-	
+
 }
