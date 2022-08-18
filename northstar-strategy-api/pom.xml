@@ -45,7 +45,13 @@
 		    <artifactId>reactor-core</artifactId>
 		    <version>3.4.19</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-core</artifactId>
+			<version>5.7.22</version>
+			<scope>compile</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

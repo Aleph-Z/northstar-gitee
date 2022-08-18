@@ -1,5 +1,7 @@
 package tech.quantit.northstar.strategy.api.demo;
 
+import static tech.quantit.northstar.strategy.api.indicator.complex.Chan.initFx;
+import static tech.quantit.northstar.strategy.api.indicator.complex.Chan.initKx;
 import static tech.quantit.northstar.strategy.api.indicator.function.AverageFunctions.*;
 import static tech.quantit.northstar.strategy.api.indicator.function.StatsFunctions.*;
 
@@ -56,6 +58,9 @@ public class IndicatorDemoStrategy extends AbstractStrategy	// 为了简化代�
 		// 复合指标
 		ctx.newIndicator("WMA_HHV", params.indicatorSymbol, WMA(72).andThen(HHV(72))); 	// 加权均价的最高价
 		ctx.newIndicator("WMA_LLV", params.indicatorSymbol, WMA(72).andThen(LLV(72))); 	// 加权均价的最高价
+
+		// 缠论画笔
+		ctx.newIndicator("Chan",params.indicatorSymbol,1,initKx().andThen(initFx()));
 	}
 	
 	@Override
