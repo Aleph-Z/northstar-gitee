@@ -68,3 +68,5 @@
 [electron-egg项目](https://www.yuque.com/u34495/mivcfg)作者，提供了简便易于上手的桌面化生成方案，并提供了相关的技术支持。  
 
 ### northstar-ttp 分支开发
+northstar-data         数据层（回测数据，其他数据）
+northstar-gateway-ttp  token聚合交易接口平台
