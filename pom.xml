@@ -54,7 +54,8 @@
 		<module>northstar-gateway-binance</module>
 		<module>northstar-strategy-api</module>
 		<module>northstar-main</module>
-	</modules>
+        <module>northstar-data</module>
+    </modules>
 
 	<dependencies>
 		<dependency>
