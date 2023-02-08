@@ -181,7 +181,8 @@
                     {{ scope.row.dealProfit | formatter }}
                   </template>
                 </el-table-column>
-                <el-table-column prop="tradingDay" label="交易日" align="center" width="100px" />
+                <el-table-column prop="createTime" label="创建时间" align="center" width="160px" />
+                <el-table-column prop="tradingDay" label="交易日" align="center" width="80px" />
               </el-table>
             </div>
             <div class="performance-min">

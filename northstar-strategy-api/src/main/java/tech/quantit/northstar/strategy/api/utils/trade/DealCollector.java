@@ -1,5 +1,8 @@
 package tech.quantit.northstar.strategy.api.utils.trade;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ClosingPolicy;
 import tech.quantit.northstar.common.model.ModuleDealRecord;
@@ -90,7 +94,7 @@ public class DealCollector {
 		ContractField contract = closeTrade.getContract();
 		int factor = FieldUtils.directionFactor(openTrade.getDirection());
 		double dealProfit = factor * (closeTrade.getPrice() - openTrade.getPrice()) * contract.getMultiplier() * closeTrade.getVolume();
-		return ModuleDealRecord.builder()
+		ModuleDealRecord result= ModuleDealRecord.builder()
 				.moduleName(moduleName)
 				.moduleAccountId(closeTrade.getGatewayId())
 				.contractName(contract.getName())
@@ -98,6 +102,10 @@ public class DealCollector {
 				.closeTrade(closeTrade.toByteArray())
 				.dealProfit(dealProfit)
 				.build();
+		//生成随机成交记录时间
+		result.setCreateTime(assembleRandomTradeTime(openTrade,closeTrade));
+
+		return result;
 	}
 	
 	private Map<String, LinkedList<TradeField>> getOpenMap(DirectionEnum dir){
@@ -114,5 +122,27 @@ public class DealCollector {
 		case D_Sell -> buyTradeMap;
 		default -> throw new IllegalArgumentException("Unexpected value: " + dir);
 		};
+	}
+
+	public LocalDateTime assembleRandomTradeTime(TradeField openTrade, TradeField closeTrade){
+		LocalDateTime result=null;
+		try{
+			Long lTradeTime=closeTrade.getTradeTimestamp();
+			if(openTrade!=null && openTrade.getTradeTimestamp() != 0L
+					&& closeTrade!=null && closeTrade.getTradeTimestamp() != 0L
+					&& openTrade.getTradeTimestamp()<closeTrade.getTradeTimestamp()){
+				long difference = Math.round(Math.random() * (closeTrade.getTradeTimestamp() - openTrade.getTradeTimestamp()));
+				lTradeTime = openTrade.getTradeTimestamp()+difference;
+			}
+
+			if(lTradeTime!=null && lTradeTime!=0L){
+				result=Instant.ofEpochMilli(lTradeTime).atZone(ZoneOffset.ofHours(8)).toLocalDateTime();
+			}
+		}catch (Exception e){
+			log.error("生成随机成交记录时间异常，openTrade={},closeTrade={}", JSON.toJSONString(openTrade),
+					JSON.toJSONString(closeTrade),e);
+		}
+
+		return result;
 	}
 }
