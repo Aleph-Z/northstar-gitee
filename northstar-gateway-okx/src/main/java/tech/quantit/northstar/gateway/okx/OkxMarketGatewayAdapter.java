@@ -15,10 +15,9 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import tech.quantit.northstar.gateway.api.w3.W3MarketGateway;
 import w3.exchange.pb.W3CoreEnum;
-import xyz.redtorch.pb.CoreEnum;
-import xyz.redtorch.pb.CoreField;
-import xyz.redtorch.pb.CoreField.ContractField;
+import w3.exchange.pb.W3CoreField.ContractField;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -31,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
-public class OkxMarketGatewayAdapter implements MarketGateway {
+public class OkxMarketGatewayAdapter implements W3MarketGateway {
 
     private FastEventEngine feEngine;
 
