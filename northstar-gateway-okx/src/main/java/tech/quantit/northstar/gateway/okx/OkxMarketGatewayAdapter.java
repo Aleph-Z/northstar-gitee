@@ -15,6 +15,7 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
+import w3.exchange.pb.W3CoreEnum;
 import xyz.redtorch.pb.CoreEnum;
 import xyz.redtorch.pb.CoreField;
 import xyz.redtorch.pb.CoreField.ContractField;
@@ -76,8 +77,8 @@ public class OkxMarketGatewayAdapter implements MarketGateway {
 
     @Override
     public boolean subscribe(ContractField contract) {
-        String symbolFull = contract.getFullName() + StrPool.DASHED + CoreEnum.ProductClassEnum.SWAP.name();
-        if (contract.getProductClass() == CoreEnum.ProductClassEnum.SWAP) {
+        String symbolFull = contract.getFullName() + StrPool.DASHED + W3CoreEnum.ProductClassEnum.SWAP.name();
+        if (contract.getProductClass() == W3CoreEnum.ProductClassEnum.SWAP) {
             // 交易订阅
             int connectId = client.symbolTicker(symbolFull, spi);
             subscribeConnectionIds.put(symbolFull, connectId);
@@ -92,7 +93,7 @@ public class OkxMarketGatewayAdapter implements MarketGateway {
     @Override
     public boolean unsubscribe(ContractField contract) {
 //        String symbolFull = contract.getFullName()+StrPool.DASHED+CoreEnum.ProductClassEnum.SWAP.name();
-        if (contract.getProductClass() == CoreEnum.ProductClassEnum.SWAP) {
+        if (contract.getProductClass() == W3CoreEnum.ProductClassEnum.SWAP) {
             client.closeAllConnections();
 //            Integer connectId = subscribeConnectionIds.get(symbolFull);
 //            if (connectId!= null) {
