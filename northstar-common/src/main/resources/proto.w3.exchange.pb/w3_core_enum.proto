@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package w3.exchange.pb;
+
+
+// ProductClassEnum是一个产品类型类型
+enum ProductClassEnum {
+  UnknownProductClass = 0; // 未知
+  SPOT = 1;     // 币币
+  MARGIN = 2;   // 币币杠杆
+  SWAP = 3;     // 永续合约
+  FUTURES = 4;  // 交割合约
+  OPTION = 5;   // 期权
+}
+
+// CurrencyEnum是一个货币类型
+enum CurrencyEnum {
+  UnknownCurrency = 0;  // 未知
+  USDT = 1;  // 美元稳定币
+  BUSD = 2;  // 币安稳定币
+  USDC = 3;  // 去中心化稳定币
+
+}
+
+// ExchangeEnum是一个交易所类型
+enum ExchangeEnum {
+  UnknownExchange = 0;  // 未知
+  BINANCE = 1;  // 币安交易所
+  OKX = 2;  // 欧易交易所
+  GATE = 3;  // 芝麻开门交易所
+}
+
+// Bar周期
+enum BarCycleEnum {
+  B_5Sec = 0;
+  B_1Min = 1;
+  B_3Min = 2;
+  B_5Min = 3;
+  B_15Min = 4;
+  B_30Min = 5;
+  B_1H = 6;
+  B_2H = 7;
+  B_4H = 8;
+  B_6H = 9;
+  B_8H = 10;
+  B_12H = 11;
+  B_1Day = 12;
+  B_3Day = 13;
+  B_1W = 14;
+  B_1M = 15;
+}
+
+
+
+
+
+
