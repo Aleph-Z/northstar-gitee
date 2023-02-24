@@ -12,6 +12,5 @@
    生成w3CoreField:
    protoc --java_out=D:\opso-worspace\northstar\northstar-common\src\main\java --proto_path=. .\w3\exchange\pb\w3_core_enum.proto .\w3\exchange\pb\w3_core_field.proto
 ```
-2. 是否
-
+2. okx网关模块初始化
 
