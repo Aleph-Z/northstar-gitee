@@ -15,9 +15,10 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.MarketGateway;
-import tech.quantit.northstar.gateway.api.w3.W3MarketGateway;
-import w3.exchange.pb.W3CoreEnum;
-import w3.exchange.pb.W3CoreField.ContractField;
+import xyz.redtorch.pb.CoreEnum;
+import xyz.redtorch.pb.CoreField;
+import xyz.redtorch.pb.CoreField.ContractField;
+
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
-public class OkxMarketGatewayAdapter implements W3MarketGateway {
+public class OkxMarketGatewayAdapter implements MarketGateway {
 
     private FastEventEngine feEngine;
 
@@ -76,8 +77,8 @@ public class OkxMarketGatewayAdapter implements W3MarketGateway {
 
     @Override
     public boolean subscribe(ContractField contract) {
-        String symbolFull = contract.getFullName() + StrPool.DASHED + W3CoreEnum.ProductClassEnum.SWAP.name();
-        if (contract.getProductClass() == W3CoreEnum.ProductClassEnum.SWAP) {
+        String symbolFull = contract.getFullName() + StrPool.DASHED + CoreEnum.ProductClassEnum.SWAP.name();
+        if (contract.getProductClass() == CoreEnum.ProductClassEnum.SWAP) {
             // 交易订阅
             int connectId = client.symbolTicker(symbolFull, spi);
             subscribeConnectionIds.put(symbolFull, connectId);
@@ -92,7 +93,7 @@ public class OkxMarketGatewayAdapter implements W3MarketGateway {
     @Override
     public boolean unsubscribe(ContractField contract) {
 //        String symbolFull = contract.getFullName()+StrPool.DASHED+CoreEnum.ProductClassEnum.SWAP.name();
-        if (contract.getProductClass() == W3CoreEnum.ProductClassEnum.SWAP) {
+        if (contract.getProductClass() == CoreEnum.ProductClassEnum.SWAP) {
             client.closeAllConnections();
 //            Integer connectId = subscribeConnectionIds.get(symbolFull);
 //            if (connectId!= null) {
@@ -104,7 +105,7 @@ public class OkxMarketGatewayAdapter implements W3MarketGateway {
 
     @Override
     public boolean isActive() {
-        return true; //spi.isActive();
+        return spi.isActive();
     }
 
     @Override
@@ -124,8 +125,8 @@ public class OkxMarketGatewayAdapter implements W3MarketGateway {
 
     class OKXSpi implements WebSocketCallback {
 
-        //      "sodUtc0":"21778.3",  零时开盘价
-//      "sodUtc8":"21565",   UTC+8 时开盘价
+        //  "sodUtc0":"21778.3",  零时开盘价
+        //  "sodUtc8":"21565",   UTC+8 时开盘价
         static final String MKT_STAT = "channel";
         static final String ASK_P = "askPx"; // 卖一价
         static final String ASK_V = "askSz"; // 卖一价对应的数量
