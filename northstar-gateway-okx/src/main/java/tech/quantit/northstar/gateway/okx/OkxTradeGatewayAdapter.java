@@ -7,9 +7,13 @@ import tech.quantit.northstar.common.event.NorthstarEventType;
 import tech.quantit.northstar.common.model.GatewayDescription;
 import tech.quantit.northstar.gateway.api.IContractManager;
 import tech.quantit.northstar.gateway.api.TradeGateway;
-import xyz.redtorch.pb.CoreField.*;
+import xyz.redtorch.pb.CoreField.CancelOrderReqField;
+import xyz.redtorch.pb.CoreField.PositionField;
+import xyz.redtorch.pb.CoreField.SubmitOrderReqField;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;

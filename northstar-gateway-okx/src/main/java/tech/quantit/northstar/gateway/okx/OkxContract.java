@@ -8,7 +8,6 @@ import tech.quantit.northstar.gateway.api.domain.contract.ContractDefinition;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.api.domain.time.GenericTradeTime;
 import tech.quantit.northstar.gateway.api.domain.time.TradeTimeDefinition;
-import tech.quantit.northstar.gateway.okx.time.W3TokenTradeTime;
 import xyz.redtorch.pb.CoreEnum;
 import xyz.redtorch.pb.CoreEnum.CurrencyEnum;
 import xyz.redtorch.pb.CoreEnum.ExchangeEnum;

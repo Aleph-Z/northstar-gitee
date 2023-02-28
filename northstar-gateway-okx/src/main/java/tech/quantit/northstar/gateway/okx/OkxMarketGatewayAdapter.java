@@ -3,10 +3,8 @@ package tech.quantit.northstar.gateway.okx;
 import cn.hutool.core.text.StrPool;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.w3.exchange.common.utils.WebSocketCallback;
-import com.w3.exchange.common.utils.WebSocketConnection;
-import com.w3.exchange.okx.impl.OKXWebsocketClientImpl;
-import com.w3.exchange.okx.wArg.WebSocketArg;
+import io.github.ztnozdormu.common.utils.WebSocketCallback;
+import io.github.ztnozdormu.okx.impl.OKXWebsocketClientImpl;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
@@ -18,7 +16,6 @@ import tech.quantit.northstar.gateway.api.MarketGateway;
 import xyz.redtorch.pb.CoreEnum;
 import xyz.redtorch.pb.CoreField;
 import xyz.redtorch.pb.CoreField.ContractField;
-
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -48,7 +45,7 @@ public class OkxMarketGatewayAdapter implements MarketGateway {
         this.gd = gd;
         this.feEngine = feEngine;
         this.spi = new OKXSpi(feEngine, contractMgr);
-        client = new OKXWebsocketClientImpl();
+        this.client = new OKXWebsocketClientImpl();
     }
 
     @Override

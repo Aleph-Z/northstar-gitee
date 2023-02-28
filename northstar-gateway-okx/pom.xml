@@ -9,9 +9,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.w3.exchange</groupId>
+            <groupId>io.github.ztnozdormu</groupId>
             <artifactId>w3-okx</artifactId>
-            <version>${w3.exchange.version}</version>
+            <version>0.0.1</version>
         </dependency>
         <dependency>
             <groupId>tech.quantit</groupId>
