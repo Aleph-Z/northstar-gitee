@@ -400,14 +400,13 @@ public class DataServiceManager implements IDataServiceManager {
 		for (JSONObject jsonObject : array) {
 			try {
 				String unifiedSymbol = jsonObject.getString("unifiedSymbol");
-				LocalDateTime localDateTime = Instant.ofEpochMilli(jsonObject.getLongValue("actionTimestamp")).atZone(ZoneId.systemDefault()).toLocalDateTime();
 				ContractField contract = contractMgr.getContract(jsonObject.getString("gatewayId"), unifiedSymbol).contractField();
 				resultList.addFirst(BarField.newBuilder()
 						.setUnifiedSymbol(unifiedSymbol)
 						.setTradingDay(jsonObject.getString("tradingDay"))
 						.setActionDay(jsonObject.getString("actionDay"))
 						.setActionTime(jsonObject.getString("actionTime"))
-						.setActionTimestamp(localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli())
+						.setActionTimestamp(jsonObject.getLongValue("actionTimestamp"))
 						.setHighPrice(normalizeValue(jsonObject.getDoubleValue("highPrice"), contract.getPriceTick()))
 						.setClosePrice(normalizeValue(jsonObject.getDoubleValue("closePrice"), contract.getPriceTick()))
 						.setLowPrice(normalizeValue(jsonObject.getDoubleValue("lowPrice"), contract.getPriceTick()))
@@ -426,9 +425,7 @@ public class DataServiceManager implements IDataServiceManager {
 				log.error("", e);
 			}
 		}
-		resultList.forEach(cf->{
-			log.info("tradingDay:{},actionDay:{},actionTime:{},actionTimestamp:{}",cf.getTradingDay(),cf.getActionDay(),cf.getActionTime(),cf.getActionTimestamp());
-		});
+
 		return resultList;
 	}
 

@@ -43,7 +43,8 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 			if(ChannelType.OKX.equals(channelType)){
 				List<String> symbols = Arrays.asList(unifiedSymbol.split(StrPool.AT));
 				unifiedSymbol = StringUtils.join(symbols,StrPool.DASHED).replaceAll(channelType.name(),"USDT");
-				return dsMgr.getW3MinutelyData(channelType.name(),symbols.get(2),unifiedSymbol, startDate, endDate);
+				List<BarField> data = dsMgr.getW3MinutelyData(channelType.name(),symbols.get(2),unifiedSymbol, startDate, endDate);
+				return data;
 			}
 		} catch (Exception e) {
 			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
