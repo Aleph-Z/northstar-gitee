@@ -103,7 +103,12 @@ public class DataServiceManager implements IDataServiceManager {
 	public List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return commonGetData("min", unifiedSymbol, startDate, endDate);
 	}
-	
+
+	@Override
+	public List<BarField> getW3MinutelyData(String exchange, String instType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		return null;
+	}
+
 	/**
 	 * 获取15分钟K线数据
 	 * @param unifiedSymbol
@@ -139,7 +144,12 @@ public class DataServiceManager implements IDataServiceManager {
 	public List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
 		return commonGetData("day", unifiedSymbol, startDate, endDate);
 	}
-	
+
+	@Override
+	public List<BarField> getW3DailyData(String exchange, String instType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		return null;
+	}
+
 	@Override
 	public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
 		DataSet dataSet = getTradeCalendar(exchange.toString(), startDate, endDate);

@@ -41,13 +41,13 @@ public class PlaybackDataLoader {
 				.filter(bar -> bar.getActionTimestamp() >= fromStartTimestamp)
 				.toList(), contract.getUnifiedSymbol());
 	}
-	
-	public List<BarField> loadMinuteDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadBars(ChannelType.CTP, contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
+
+	public List<BarField> loadMinuteDataRaw(String gatewayId,LocalDate startDate, LocalDate endDate, ContractField contract){
+		return enhanceData(mdRepo.loadBars(ChannelType.valueOf(gatewayId), contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
-	
-	public List<BarField> loadTradeDayDataRaw(LocalDate startDate, LocalDate endDate, ContractField contract){
-		return enhanceData(mdRepo.loadDailyBars("CTP", contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
+
+	public List<BarField> loadTradeDayDataRaw(String gatewayId,LocalDate startDate, LocalDate endDate, ContractField contract){
+		return enhanceData(mdRepo.loadDailyBars(gatewayId, contract.getUnifiedSymbol(), startDate, endDate), contract.getUnifiedSymbol());
 	}
 	
 	private List<BarField> enhanceData(List<BarField> list, String unifiedSymbol) {

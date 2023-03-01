@@ -15,6 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.PlaybackPrecision;
 import tech.quantit.northstar.common.constant.PlaybackSpeed;
 import tech.quantit.northstar.common.event.FastEventEngine;
@@ -57,7 +58,7 @@ class PlaybackContextTest {
 	void prepare() {
 		when(clock.nextMarketMinute()).thenReturn(ldt.plusMinutes(1));
 		when(loader.loadMinuteData(eq(ldt), eq(contract))).thenReturn(List.of(bar));
-		when(loader.loadTradeDayDataRaw(any(LocalDate.class), any(LocalDate.class), eq(contract))).thenReturn(List.of(bar));
+		when(loader.loadTradeDayDataRaw(ChannelType.CTP.name(),any(LocalDate.class), any(LocalDate.class), eq(contract))).thenReturn(List.of(bar));
 		when(contractMgr.getContract(any(Identifier.class))).thenReturn(c);
 		when(contractMgr.getContract(anyString(), anyString())).thenReturn(c);
 		when(c.contractField()).thenReturn(contract);
