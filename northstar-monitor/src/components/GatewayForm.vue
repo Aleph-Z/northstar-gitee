@@ -307,8 +307,10 @@ export default {
           if(this.form.channelType === 'PLAYBACK'){
             const ctpListPromise = contractApi.getGatewayContracts('CTP', query)
             const pbListPromise = contractApi.getGatewayContracts('PLAYBACK', query)
-            Promise.all([ctpListPromise, pbListPromise]).then(([ctpResult, pbResult]) => {
-              this.contractOptions = [...ctpResult, ...pbResult]
+            // 新增OKX合约品种查询
+            const okxListPromise = contractApi.getGatewayContracts('OKX', query)
+            Promise.all([ctpListPromise, pbListPromise, okxListPromise]).then(([ctpResult, pbResult, okxResult]) => {
+              this.contractOptions = [...ctpResult, ...pbResult, ...okxResult]
             }).finally(() => {
               this.loading = false;
             })
