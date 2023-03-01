@@ -1,9 +1,11 @@
 package tech.quantit.northstar.data.ds;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import cn.hutool.core.text.StrPool;
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,17 +49,21 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 	
 	@Override
 	public List<BarField> loadDailyBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		if(!StringUtils.equals(gatewayId, "CTP")) {
-			log.debug("无法查询CTP网关以外的历史行情数据");
-			return Collections.emptyList();
-		}
+
 		log.debug("从数据服务加载历史行情日数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		try {
-			return dsMgr.getDailyData(unifiedSymbol, startDate, endDate);
+			if(StringUtils.equals(gatewayId, "CTP")) {
+				return dsMgr.getDailyData(unifiedSymbol, startDate, endDate);
+			}
+			if(ChannelType.OKX.equals(ChannelType.valueOf(gatewayId))){
+				List<String> symbols = Arrays.asList(unifiedSymbol.split(StrPool.AT));
+				unifiedSymbol = StringUtils.join(symbols,StrPool.DASHED).replaceAll(gatewayId,"USDT");
+				return dsMgr.getW3DailyData(gatewayId,symbols.get(2),unifiedSymbol, startDate, endDate);
+			}
 		} catch (Exception e) {
 			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
-			return Collections.emptyList();
 		}
+		return Collections.emptyList();
 	}
 
 	@Override
