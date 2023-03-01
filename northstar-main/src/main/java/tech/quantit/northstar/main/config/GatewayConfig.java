@@ -58,7 +58,7 @@ public class GatewayConfig {
 		factoryMap.put(ChannelType.TIGER, new TigerGatewayFactory(fastEventEngine, mktCenter));
 		// 新增OKX网关工厂对象
 		factoryMap.put(ChannelType.OKX,new OkxGatewayFactory(fastEventEngine,mktCenter));
-		
+
 		return new GatewayMetaProvider(settingsMap, factoryMap);
 	}
 }

@@ -51,11 +51,13 @@ public class RepositoryConfig {
 	
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;
-	
+	@Value("${northstar.data-service.w3BaseUrl}")
+	private String w3BaseUrl;
+
 	@Bean
 	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
 		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
-		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
+		return new DataServiceManager(baseUrl,w3BaseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
 	}
 	
 	@Bean
