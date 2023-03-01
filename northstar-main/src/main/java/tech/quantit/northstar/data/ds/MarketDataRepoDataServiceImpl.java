@@ -34,17 +34,21 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
 
 	@Override
 	public List<BarField> loadBars(ChannelType channelType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		if(channelType != ChannelType.CTP) {
-			log.debug("无法查询CTP网关以外的历史行情数据");
-			return Collections.emptyList();
-		}
+
 		log.debug("从数据服务加载历史行情分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		try {			
-			return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
+		try {
+			if(ChannelType.CTP.equals(channelType)) {
+				return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
+			}
+			if(ChannelType.OKX.equals(channelType)){
+				List<String> symbols = Arrays.asList(unifiedSymbol.split(StrPool.AT));
+				unifiedSymbol = StringUtils.join(symbols,StrPool.DASHED).replaceAll(channelType.name(),"USDT");
+				return dsMgr.getW3MinutelyData(channelType.name(),symbols.get(2),unifiedSymbol, startDate, endDate);
+			}
 		} catch (Exception e) {
 			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
-			return Collections.emptyList();
 		}
+		return Collections.emptyList();
 	}
 	
 	@Override
