@@ -62,7 +62,14 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<ContractField> getAllContracts(ExchangeEnum exchange);
-	
+
+	/**
+	 * 获取币圈合约数据
+	 * @param exchange
+	 * @return
+	 */
+	List<ContractField> getW3AllContracts(ExchangeEnum exchange);
+
 	/**
 	 * 获取CTP信息
 	 * @param brokerId

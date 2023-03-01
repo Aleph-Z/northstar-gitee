@@ -1,18 +1,13 @@
 package tech.quantit.northstar.data.ds;
 
 import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.ztnozdormu.common.utils.ExResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +47,8 @@ public class DataServiceManager implements IDataServiceManager {
 	private String dummyToken;
 
 	private String baseUrl;
-	
+
+	private String w3BaseUrl;
 	private DateTimeFormatter dtfmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	
 	private DateTimeFormatter dtfmt2 = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
@@ -65,8 +61,9 @@ public class DataServiceManager implements IDataServiceManager {
 	
 	private EnumMap<ExchangeEnum, ChannelType> exchangeChannelType = new EnumMap<>(ExchangeEnum.class);
 	
-	public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
+	public DataServiceManager(String baseUrl, String w3BaseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
 		this.baseUrl =  baseUrl;
+		this.w3BaseUrl = w3BaseUrl;
 		this.userToken = secret;
 		this.dtUtil = dtUtil;
 		this.restTemplate = restTemplate;
@@ -207,6 +204,51 @@ public class DataServiceManager implements IDataServiceManager {
 		}
 		return resultList;
 	}
+
+	@Override
+	public List<ContractField> getW3AllContracts(ExchangeEnum exchange) {
+		ResponseEntity<W3DataSetVO> result = execute(URI.create(String.format("%s/dataex/tokenInfo/contracts?exchange=%s", w3BaseUrl, exchange)), W3DataSetVO.class);
+		W3DataSetVO w3DataSetVO = result.getBody();
+		if (Objects.isNull(w3DataSetVO.getData())) {
+			return Collections.emptyList();
+		}
+		LinkedList<ContractField> resultList = new LinkedList<>();
+		ObjectMapper mapper = new ObjectMapper();
+		List<TokenDataSetVO> dataSetVOS = mapper.convertValue(w3DataSetVO.getData(), new TypeReference<List<TokenDataSetVO>>() {
+		});
+
+		dataSetVOS.forEach(dataSetVO -> {
+
+			String unifiedSymbol = dataSetVO.getNsCode();
+			String symbol = dataSetVO.getSymbol();
+			String name = dataSetVO.getName();
+			String unitDesc = dataSetVO.getQuoteUnitDesc();
+
+			try {
+				ContractField contract = ContractField.newBuilder()
+						.setUnifiedSymbol(unifiedSymbol)
+						.setSymbol(symbol)
+						.setExchange(exchange)
+						.setCurrency(CurrencyEnum.USDT)
+						.setFullName(name)
+						.setName(name)
+						.setContractId(unifiedSymbol + "@" + channelName(exchange))
+						.setGatewayId(channelName(exchange))
+						.setThirdPartyId(symbol + "@" + channelName(exchange))
+						.setLastTradeDateOrContractMonth(dataSetVO.getDelistDate())
+						.setLongMarginRatio(0.1)
+						.setShortMarginRatio(0.1)
+						.setProductClass(ProductClassEnum.SWAP)
+						.setMultiplier(Double.parseDouble(dataSetVO.getMultiplier()))
+						.setPriceTick(0.1)
+						.build();
+				resultList.add(contract);
+			} catch (Exception e) {
+				log.warn("无效合约数据：{}", JSON.toJSONString(dataSetVO));
+			}
+		});
+		return resultList;
+	}
 	
 	private String channelName(ExchangeEnum exchange) {
 		return exchangeChannelType.get(exchange).name();
@@ -322,7 +364,55 @@ public class DataServiceManager implements IDataServiceManager {
 		
 		return resultList;
 	}
-	
+
+	private List<BarField> convertW3DataSet(ExResult<List<LinkedHashMap>> result) {
+		if (result.getCode() != 200) {
+			log.warn("数据服务查询失败!");
+			return Collections.emptyList();
+		}
+		if (Objects.isNull(result.data)) {
+			log.warn("数据服务查询不到相关数据");
+			return Collections.emptyList();
+		}
+
+		LinkedList<BarField> resultList = new LinkedList<>();
+		List<JSONObject> array = JSON.parseArray(JSON.toJSONString(result.getData()), JSONObject.class);
+
+		for (JSONObject jsonObject : array) {
+			try {
+				String unifiedSymbol = jsonObject.getString("unifiedSymbol");
+				LocalDateTime localDateTime = Instant.ofEpochMilli(jsonObject.getLongValue("actionTimestamp")).atZone(ZoneId.systemDefault()).toLocalDateTime();
+				ContractField contract = contractMgr.getContract(jsonObject.getString("gatewayId"), unifiedSymbol).contractField();
+				resultList.addFirst(BarField.newBuilder()
+						.setUnifiedSymbol(unifiedSymbol)
+						.setTradingDay(jsonObject.getString("tradingDay"))
+						.setActionDay(jsonObject.getString("actionDay"))
+						.setActionTime(jsonObject.getString("actionTime"))
+						.setActionTimestamp(localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli())
+						.setHighPrice(normalizeValue(jsonObject.getDoubleValue("highPrice"), contract.getPriceTick()))
+						.setClosePrice(normalizeValue(jsonObject.getDoubleValue("closePrice"), contract.getPriceTick()))
+						.setLowPrice(normalizeValue(jsonObject.getDoubleValue("lowPrice"), contract.getPriceTick()))
+						.setOpenPrice(normalizeValue(jsonObject.getDoubleValue("openPrice"), contract.getPriceTick()))
+						.setGatewayId(contract.getGatewayId())
+						.setOpenInterestDelta(jsonObject.getDoubleValue("openInterestDelta"))
+						.setOpenInterest(jsonObject.getDoubleValue("openInterest"))
+						.setVolume(jsonObject.getLongValue("volume"))
+						.setTurnover(jsonObject.getDouble("turnover"))
+						.setPreClosePrice(jsonObject.getDoubleValue("preClosePrice"))
+						.setPreSettlePrice(jsonObject.getDoubleValue("preSettlePrice"))
+						.setPreOpenInterest(jsonObject.getDoubleValue("preOpenInterest"))
+						.build());
+			} catch (Exception e) {
+				log.warn("无效合约行情数据：{}", jsonObject.toJSONString());
+				log.error("", e);
+			}
+		}
+		resultList.forEach(cf->{
+			log.info("tradingDay:{},actionDay:{},actionTime:{},actionTimestamp:{}",cf.getTradingDay(),cf.getActionDay(),cf.getActionTime(),cf.getActionTimestamp());
+		});
+		return resultList;
+	}
+
 	private ChannelType getExchange(String unifiedSymbol) {
 		ExchangeEnum exchange = ExchangeEnum.valueOf(unifiedSymbol.replaceAll("[^@]+@([^@]+)@[^@]+", "$1"));
 		return exchangeChannelType.get(exchange);
@@ -348,6 +438,101 @@ public class DataServiceManager implements IDataServiceManager {
 		private String error;
 		
 		private String message;
+	}
+
+	@Data
+	protected static class W3DataSetVO<T> {
+
+		public W3DataSetVO() {
+
+		}
+
+		/**
+		 * 返回状态
+		 */
+		private int code;
+		/**
+		 * 提示信息
+		 */
+		private String msg;
+		/**
+		 * 分页查询时总条数
+		 */
+		private Long total;
+		/**
+		 * 返回数据
+		 */
+		private T data;
+	}
+
+	@Data
+	protected static class TokenDataSetVO {
+
+		public TokenDataSetVO() {
+
+		}
+
+		/**
+		 * BTC@OKX@SWAP  jd1907@DCE@FUTURES
+		 */
+		private String nsCode;
+		/**
+		 * BTC   JD1907
+		 */
+		private String symbol;
+		/**
+		 * OKX  DCE
+		 */
+		private String exchange;
+		/**
+		 * BTC 鸡蛋1907
+		 */
+		private String name;
+		/**
+		 * BTC  JD
+		 */
+		private String futCode;
+		/**
+		 * 倍数
+		 */
+		private String multiplier;
+		/**
+		 * 吨 交易单位
+		 */
+		private String tradeUnit;
+		/**
+		 * 5.0
+		 */
+		private String perUnit;
+		/**
+		 * 人民币元/500千克
+		 */
+		private String quoteUnit;
+		/**
+		 * 1人民币元/500千克
+		 */
+		private String quoteUnitDesc;
+		/**
+		 * 实物交割
+		 */
+		private String dModeDesc;
+		/**
+		 * 20180727
+		 */
+		private String listDate;
+		/**
+		 * 20190726
+		 */
+		private String delistDate;
+		/**
+		 * 201907
+		 */
+		private String dMonth;
+		/**
+		 * 20190731
+		 */
+		private String lastDdate;
+
 	}
 
 }
