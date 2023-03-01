@@ -7,6 +7,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.ztnozdormu.common.enums.FrequencyType;
 import io.github.ztnozdormu.common.utils.ExResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
@@ -74,7 +75,8 @@ public class DataServiceManager implements IDataServiceManager {
 		exchangeChannelType.put(ExchangeEnum.DCE, ChannelType.CTP);
 		exchangeChannelType.put(ExchangeEnum.CZCE, ChannelType.CTP);
 		exchangeChannelType.put(ExchangeEnum.INE, ChannelType.CTP);
-		
+		exchangeChannelType.put(ExchangeEnum.OKX, ChannelType.OKX);
+
 		log.info("采用外部数据源加载历史数据");
 		register();
 	}
@@ -106,7 +108,7 @@ public class DataServiceManager implements IDataServiceManager {
 
 	@Override
 	public List<BarField> getW3MinutelyData(String exchange, String instType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		return null;
+		return commonGetW3Data(exchange, instType, FrequencyType.MIN_1.value(), unifiedSymbol, startDate, endDate);
 	}
 
 	/**
@@ -147,7 +149,7 @@ public class DataServiceManager implements IDataServiceManager {
 
 	@Override
 	public List<BarField> getW3DailyData(String exchange, String instType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
-		return null;
+		return commonGetW3Data(exchange, instType, FrequencyType.ONE_DAY.value(), unifiedSymbol, startDate, endDate);
 	}
 
 	@Override
@@ -286,6 +288,13 @@ public class DataServiceManager implements IDataServiceManager {
 		URI uri = URI.create(String.format("%s/data/%s?unifiedSymbol=%s&startDate=%s&endDate=%s", baseUrl, type, unifiedSymbol, 
 				startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER)));
 		return convertDataSet(execute(uri, DataSet.class).getBody());
+	}
+    // 币圈数据
+	private List<BarField> commonGetW3Data(String exchange, String instType, String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+		URI uri = URI.create(
+				String.format("%s/dataex/data/hostoryKlines?exchange=%s&instType=%s&frequencyType=%s&&unifiedSymbol=%s&startDate=%s&endDate=%s",
+						w3BaseUrl, exchange, instType, type, unifiedSymbol, startDate, endDate));
+		return convertW3DataSet(execute(uri, ExResult.class).getBody());
 	}
 	
 	private <T> ResponseEntity<T> execute(URI uri, Class<T> clz) {
