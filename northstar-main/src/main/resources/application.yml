@@ -8,7 +8,7 @@ northstar:
   contraceDefFile: classpath:ContractDefinition.csv
   data-service:
     baseUrl: https://service.quantit.tech:44388
-    w3BaseUrl: http://localhost:19001
+    w3BaseUrl: https://1711du6428.goho.co  #http://localhost:19001
 logging:
   level: 
     root: info
