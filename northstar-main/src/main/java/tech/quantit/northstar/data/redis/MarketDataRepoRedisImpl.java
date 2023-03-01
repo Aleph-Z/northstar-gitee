@@ -68,7 +68,6 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 					.toList();
 			resultList.addAll(list);
 		}
-		log.info("BarField数据结果1：{}",resultList);
 		if(today.isAfter(endDate0))
 			return resultList;
 
@@ -89,7 +88,6 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 				resultList.addAll(findBarData(localQueryDate, channelType, unifiedSymbol));
 			}
 		}
-		log.info("BarField数据结果2：{}",resultList);
 		return resultList;
 	}
 	
