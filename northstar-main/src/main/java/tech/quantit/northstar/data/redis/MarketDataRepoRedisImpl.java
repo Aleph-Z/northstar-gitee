@@ -68,8 +68,9 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 					.toList();
 			resultList.addAll(list);
 		}
-		if(today.isAfter(endDate0))	return resultList; 
-		
+		if(today.isAfter(endDate0))
+			return resultList;
+
 		LocalDate localQueryDate = today;
 		if(resultList.isEmpty()) {
 			while(resultList.isEmpty() && endDate0.isAfter(localQueryDate)) {
@@ -87,7 +88,6 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 				resultList.addAll(findBarData(localQueryDate, channelType, unifiedSymbol));
 			}
 		}
-		
 		return resultList;
 	}
 	
