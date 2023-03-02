@@ -21,15 +21,6 @@ public interface IDataServiceManager {
 	List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
 
 	/**
-	 * 获取币圈交易市场 1分钟K线数据
-	 * @param unifiedSymbol
-	 * @param startDate
-	 * @param endDate
-	 * @return
-	 */
-	List<BarField> getW3MinutelyData(String exchange,String instType,String unifiedSymbol, LocalDate startDate, LocalDate endDate);
-
-	/**
 	 * 获取15分钟K线数据
 	 * @param unifiedSymbol
 	 * @param startDate
@@ -55,16 +46,7 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
-
-	/**
-	 * 获取币圈交易市场 获取日K线数据
-	 * @param unifiedSymbol
-	 * @param startDate
-	 * @param endDate
-	 * @return
-	 */
-	List<BarField> getW3DailyData(String exchange,String instType,String unifiedSymbol, LocalDate startDate, LocalDate endDate);
-
+	
 	/**
 	 * 获取查询范围内的节假日（包括周末）
 	 * @param exchange
