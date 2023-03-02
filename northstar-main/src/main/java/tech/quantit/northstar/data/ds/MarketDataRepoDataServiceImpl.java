@@ -17,71 +17,65 @@ import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 import xyz.redtorch.pb.CoreField.BarField;
 
 @Slf4j
-public class MarketDataRepoDataServiceImpl implements IMarketDataRepository{
+public class MarketDataRepoDataServiceImpl implements IMarketDataRepository {
 
-	private static final String EMPTY_IMPLEMENTATION_HINT = "采用历史行情数据服务适配器时，不实现该方法";
-	
-	private IDataServiceManager dsMgr;
-	
-	public MarketDataRepoDataServiceImpl(IDataServiceManager dsMgr) {
-		this.dsMgr = dsMgr;
-	}
-	
-	@Override
-	public void insert(BarField bar) {
-		log.trace(EMPTY_IMPLEMENTATION_HINT);
-	}
+    private static final String EMPTY_IMPLEMENTATION_HINT = "采用历史行情数据服务适配器时，不实现该方法";
 
-	@Override
-	public List<BarField> loadBars(ChannelType channelType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+    private IDataServiceManager dsMgr;
 
-		log.debug("从数据服务加载历史行情分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		try {
-			if(ChannelType.CTP.equals(channelType)) {
-				return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
-			}
-			if(ChannelType.OKX.equals(channelType)){
-				List<String> symbols = Arrays.asList(unifiedSymbol.split(StrPool.AT));
-				unifiedSymbol = StringUtils.join(symbols,StrPool.DASHED).replaceAll(channelType.name(),"USDT");
-				return dsMgr.getW3MinutelyData(channelType.name(),symbols.get(2),unifiedSymbol, startDate, endDate);
-			}
-		} catch (Exception e) {
-			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
-		}
-		return Collections.emptyList();
-	}
-	
-	@Override
-	public List<BarField> loadDailyBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+    public MarketDataRepoDataServiceImpl(IDataServiceManager dsMgr) {
+        this.dsMgr = dsMgr;
+    }
 
-		log.debug("从数据服务加载历史行情日数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
-		try {
-			if(StringUtils.equals(gatewayId, "CTP")) {
-				return dsMgr.getDailyData(unifiedSymbol, startDate, endDate);
-			}
-			if(ChannelType.OKX.equals(ChannelType.valueOf(gatewayId))){
-				List<String> symbols = Arrays.asList(unifiedSymbol.split(StrPool.AT));
-				unifiedSymbol = StringUtils.join(symbols,StrPool.DASHED).replaceAll(gatewayId,"USDT");
-				return dsMgr.getW3DailyData(gatewayId,symbols.get(2),unifiedSymbol, startDate, endDate);
-			}
-		} catch (Exception e) {
-			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
-		}
-		return Collections.emptyList();
-	}
+    @Override
+    public void insert(BarField bar) {
+        log.trace(EMPTY_IMPLEMENTATION_HINT);
+    }
 
-	@Override
-	public List<LocalDate> findHodidayInLaw(String gatewayType, int year) {
-		List<LocalDate> resultList;
-		try {
-			resultList = dsMgr.getHolidays(ExchangeEnum.SHFE, LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
-		} catch (Exception e) {
-			log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
-			return Collections.emptyList();
-		}
-		return resultList.stream()
-				.filter(date -> date.getDayOfWeek().getValue() < 6)
-				.toList();
-	}
+    @Override
+    public List<BarField> loadBars(ChannelType channelType, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+
+        log.debug("从数据服务加载历史行情分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+        try {
+            return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
+//			if(ChannelType.OKX.equals(channelType)){
+//				List<String> symbols = Arrays.asList(unifiedSymbol.split(StrPool.AT));
+//				unifiedSymbol = StringUtils.join(symbols,StrPool.DASHED).replaceAll(channelType.name(),"USDT");
+//				return dsMgr.getW3MinutelyData(unifiedSymbol, startDate, endDate);
+//			}
+        } catch (Exception e) {
+            log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<BarField> loadDailyBars(String gatewayId, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
+
+        log.debug("从数据服务加载历史行情日数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
+        try {
+            return dsMgr.getDailyData(unifiedSymbol, startDate, endDate);
+//            if (ChannelType.OKX.equals(ChannelType.valueOf(gatewayId))) {
+//                return dsMgr.getW3DailyData(unifiedSymbol, startDate, endDate);
+//            }
+        } catch (Exception e) {
+            log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<LocalDate> findHodidayInLaw(String gatewayType, int year) {
+        List<LocalDate> resultList;
+        try {
+            resultList = dsMgr.getHolidays(ExchangeEnum.SHFE, LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31));
+        } catch (Exception e) {
+            log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
+        return resultList.stream()
+                .filter(date -> date.getDayOfWeek().getValue() < 6)
+                .toList();
+    }
 
 }
