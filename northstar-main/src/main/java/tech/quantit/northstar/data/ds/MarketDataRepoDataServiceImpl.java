@@ -38,11 +38,6 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository {
         log.debug("从数据服务加载历史行情分钟数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
         try {
             return dsMgr.getMinutelyData(unifiedSymbol, startDate, endDate);
-//			if(ChannelType.OKX.equals(channelType)){
-//				List<String> symbols = Arrays.asList(unifiedSymbol.split(StrPool.AT));
-//				unifiedSymbol = StringUtils.join(symbols,StrPool.DASHED).replaceAll(channelType.name(),"USDT");
-//				return dsMgr.getW3MinutelyData(unifiedSymbol, startDate, endDate);
-//			}
         } catch (Exception e) {
             log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
         }
@@ -55,9 +50,6 @@ public class MarketDataRepoDataServiceImpl implements IMarketDataRepository {
         log.debug("从数据服务加载历史行情日数据：{}，{} -> {}", unifiedSymbol, startDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), endDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER));
         try {
             return dsMgr.getDailyData(unifiedSymbol, startDate, endDate);
-//            if (ChannelType.OKX.equals(ChannelType.valueOf(gatewayId))) {
-//                return dsMgr.getW3DailyData(unifiedSymbol, startDate, endDate);
-//            }
         } catch (Exception e) {
             log.warn("第三方数据服务暂时不可用：{}", e.getMessage(), e);
         }
