@@ -142,7 +142,6 @@ public class OkxContract implements Instrument {
 
 	@Override
 	public TradeTimeDefinition tradeTimeDefinition() {
-		//new W3TokenTradeTime()
 		return new GenericTradeTime();
 	}
 
