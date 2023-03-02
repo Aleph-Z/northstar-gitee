@@ -207,7 +207,7 @@ public class PlaybackContext {
 						.map(c -> contractMgr.getContract(Identifier.of(c.getValue())))
 						.map(Contract::contractField)
 						.forEach(contract -> {
-							loader.loadTradeDayDataRaw(contract.getGatewayId(),
+							loader.loadTradeDayDataRaw(
 									startDate,
 									endDate,
 									contract)
@@ -224,7 +224,7 @@ public class PlaybackContext {
 										queryEnd = preloadEndDate;
 									}
 									
-									loader.loadMinuteDataRaw(contract.getGatewayId(),queryStart, queryEnd, contract)
+									loader.loadMinuteDataRaw(queryStart, queryEnd, contract)
 										.stream()
 										.forEachOrdered(bar -> {
 											log.trace("Bar信息： {} {}， {} 价格：{}，网关:{}", bar.getActionDay(), bar.getActionTime(), bar.getUnifiedSymbol(), bar.getClosePrice(), bar.getGatewayId());
