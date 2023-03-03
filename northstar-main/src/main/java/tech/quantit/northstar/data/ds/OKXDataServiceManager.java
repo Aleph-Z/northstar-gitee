@@ -31,18 +31,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * 历史数据服务接口管理器
+ * 币圈历史数据服务接口管理器
+ * 命名规范约定
+ * 具体网关名称+DataServiceManager DataServiceManager默认对应CTP网关
  *
  * @author zt
  */
 
 @Slf4j
-public class W3DataServiceManager implements IDataServiceManager {
+public class OKXDataServiceManager implements IDataServiceManager {
 
     private String userToken;
 
     private String dummyToken;
     private String w3BaseUrl;
+
     private DateTimeFormatter dtfmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private DateTimeFormatter dtfmt2 = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
@@ -55,7 +58,7 @@ public class W3DataServiceManager implements IDataServiceManager {
 
     private EnumMap<ExchangeEnum, ChannelType> exchangeChannelType = new EnumMap<>(ExchangeEnum.class);
 
-    public W3DataServiceManager(String w3BaseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
+    public OKXDataServiceManager(String w3BaseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
         this.w3BaseUrl = w3BaseUrl;
         this.userToken = secret;
         this.dtUtil = dtUtil;
@@ -121,7 +124,8 @@ public class W3DataServiceManager implements IDataServiceManager {
     }
 
     /**
-     *   暂不需要实现 TODO
+     * 暂不需要实现 TODO
+     *
      * @param exchange
      * @param startDate
      * @param endDate
@@ -130,7 +134,7 @@ public class W3DataServiceManager implements IDataServiceManager {
     @Override
     public List<LocalDate> getHolidays(ExchangeEnum exchange, LocalDate startDate, LocalDate endDate) {
 
-       return null;
+        return null;
     }
 
     @Override
@@ -153,23 +157,7 @@ public class W3DataServiceManager implements IDataServiceManager {
             String unitDesc = dataSetVO.getQuoteUnitDesc();
 
             try {
-                ContractField contract = ContractField.newBuilder()
-                        .setUnifiedSymbol(unifiedSymbol)
-                        .setSymbol(symbol)
-                        .setExchange(exchange)
-                        .setCurrency(CurrencyEnum.USDT)
-                        .setFullName(name)
-                        .setName(name)
-                        .setContractId(unifiedSymbol)
-                        .setGatewayId(channelName(exchange))
-                        .setThirdPartyId(symbol + "@" + channelName(exchange))
-                        .setLastTradeDateOrContractMonth(dataSetVO.getDelistDate())
-                        .setLongMarginRatio(0.1)
-                        .setShortMarginRatio(0.1)
-                        .setProductClass(ProductClassEnum.SWAP)
-                        .setMultiplier(Double.parseDouble(dataSetVO.getMultiplier()))
-                        .setPriceTick(0.1)
-                        .build();
+                ContractField contract = ContractField.newBuilder().setUnifiedSymbol(unifiedSymbol).setSymbol(symbol).setExchange(exchange).setCurrency(CurrencyEnum.USDT).setFullName(name).setName(name).setContractId(unifiedSymbol).setGatewayId(channelName(exchange)).setThirdPartyId(symbol + "@" + channelName(exchange)).setLastTradeDateOrContractMonth(dataSetVO.getDelistDate()).setLongMarginRatio(0.1).setShortMarginRatio(0.1).setProductClass(ProductClassEnum.SWAP).setMultiplier(Double.parseDouble(dataSetVO.getMultiplier())).setPriceTick(0.1).build();
                 resultList.add(contract);
             } catch (Exception e) {
                 log.warn("无效合约数据：{}", JSON.toJSONString(dataSetVO));
@@ -194,9 +182,7 @@ public class W3DataServiceManager implements IDataServiceManager {
 
     private List<BarField> commonGetData(String type, String unifiedSymbol, LocalDate startDate, LocalDate endDate) {
         // 币圈市场数据
-        URI uri = URI.create(
-                String.format("%s/dataex/data/hostoryKlines?frequencyType=%s&&unifiedSymbol=%s&startDate=%s&endDate=%s",
-                        w3BaseUrl, type, unifiedSymbol, startDate, endDate));
+        URI uri = URI.create(String.format("%s/dataex/data/hostoryKlines?frequencyType=%s&&unifiedSymbol=%s&startDate=%s&endDate=%s", w3BaseUrl, type, unifiedSymbol, startDate, endDate));
         return convertDataSet(execute(uri, ExResult.class).getBody());
     }
 
@@ -238,25 +224,7 @@ public class W3DataServiceManager implements IDataServiceManager {
             try {
                 String unifiedSymbol = jsonObject.getString("unifiedSymbol");
                 ContractField contract = contractMgr.getContract(jsonObject.getString("gatewayId"), unifiedSymbol).contractField();
-                resultList.addFirst(BarField.newBuilder()
-                        .setUnifiedSymbol(unifiedSymbol)
-                        .setTradingDay(jsonObject.getString("tradingDay"))
-                        .setActionDay(jsonObject.getString("actionDay"))
-                        .setActionTime(jsonObject.getString("actionTime"))
-                        .setActionTimestamp(jsonObject.getLongValue("actionTimestamp"))
-                        .setHighPrice(normalizeValue(jsonObject.getDoubleValue("highPrice"), contract.getPriceTick()))
-                        .setClosePrice(normalizeValue(jsonObject.getDoubleValue("closePrice"), contract.getPriceTick()))
-                        .setLowPrice(normalizeValue(jsonObject.getDoubleValue("lowPrice"), contract.getPriceTick()))
-                        .setOpenPrice(normalizeValue(jsonObject.getDoubleValue("openPrice"), contract.getPriceTick()))
-                        .setGatewayId(contract.getGatewayId())
-                        .setOpenInterestDelta(jsonObject.getDoubleValue("openInterestDelta"))
-                        .setOpenInterest(jsonObject.getDoubleValue("openInterest"))
-                        .setVolume(jsonObject.getLongValue("volume"))
-                        .setTurnover(jsonObject.getDouble("turnover"))
-                        .setPreClosePrice(jsonObject.getDoubleValue("preClosePrice"))
-                        .setPreSettlePrice(jsonObject.getDoubleValue("preSettlePrice"))
-                        .setPreOpenInterest(jsonObject.getDoubleValue("preOpenInterest"))
-                        .build());
+                resultList.addFirst(BarField.newBuilder().setUnifiedSymbol(unifiedSymbol).setTradingDay(jsonObject.getString("tradingDay")).setActionDay(jsonObject.getString("actionDay")).setActionTime(jsonObject.getString("actionTime")).setActionTimestamp(jsonObject.getLongValue("actionTimestamp")).setHighPrice(normalizeValue(jsonObject.getDoubleValue("highPrice"), contract.getPriceTick())).setClosePrice(normalizeValue(jsonObject.getDoubleValue("closePrice"), contract.getPriceTick())).setLowPrice(normalizeValue(jsonObject.getDoubleValue("lowPrice"), contract.getPriceTick())).setOpenPrice(normalizeValue(jsonObject.getDoubleValue("openPrice"), contract.getPriceTick())).setGatewayId(contract.getGatewayId()).setOpenInterestDelta(jsonObject.getDoubleValue("openInterestDelta")).setOpenInterest(jsonObject.getDoubleValue("openInterest")).setVolume(jsonObject.getLongValue("volume")).setTurnover(jsonObject.getDouble("turnover")).setPreClosePrice(jsonObject.getDoubleValue("preClosePrice")).setPreSettlePrice(jsonObject.getDoubleValue("preSettlePrice")).setPreOpenInterest(jsonObject.getDoubleValue("preOpenInterest")).build());
             } catch (Exception e) {
                 log.warn("无效合约行情数据：{}", jsonObject.toJSONString());
                 log.error("", e);
@@ -273,6 +241,7 @@ public class W3DataServiceManager implements IDataServiceManager {
     private String getValue(String key, Map<String, Integer> fieldIndexMap, String[] item, String defaultVal) {
         return fieldIndexMap.containsKey(key) && Objects.nonNull(item[fieldIndexMap.get(key)]) ? item[fieldIndexMap.get(key)] : defaultVal;
     }
+
     @Data
     protected static class W3DataSetVO<T> {
 

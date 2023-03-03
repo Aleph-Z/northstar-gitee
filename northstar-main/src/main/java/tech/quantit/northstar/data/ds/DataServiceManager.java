@@ -4,12 +4,6 @@ import java.net.URI;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-import cn.hutool.core.text.StrPool;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.ztnozdormu.common.enums.FrequencyType;
-import io.github.ztnozdormu.common.utils.ExResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +31,8 @@ import xyz.redtorch.pb.CoreField.ContractField;
 
 /**
  * 历史数据服务接口管理器
- *
+ * 命名规范约定
+ *     具体网关名称+DataServiceManager DataServiceManager默认对应CTP网关
  * @author KevinHuangwl
  */
 
@@ -61,6 +56,7 @@ public class DataServiceManager implements IDataServiceManager {
     private IContractManager contractMgr;
 
     private EnumMap<ExchangeEnum, ChannelType> exchangeChannelType = new EnumMap<>(ExchangeEnum.class);
+
 
     public DataServiceManager(String baseUrl, String secret, RestTemplate restTemplate, MarketDateTimeUtil dtUtil, IContractManager contractMgr) {
         this.baseUrl = baseUrl;

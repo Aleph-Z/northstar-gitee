@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.data.factory.GatewayDsmProvider;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.ctp.CtpContract;
@@ -24,51 +24,51 @@ import xyz.redtorch.pb.CoreEnum.ExchangeEnum;
 @Slf4j
 @Component
 @ConditionalOnExpression("!'${spring.profiles.active}'.equals('test')")
-public class ContractsDefaultLoader implements CommandLineRunner{
+public class ContractsDefaultLoader implements CommandLineRunner {
 
-	@Autowired
-	private IMarketCenter mktCenter;
-	
-	@Autowired
-	private DataServiceManager dsMgr;
-	
-	@Autowired
-	private GatewayService gatewayService;
-	
-	@Autowired
-	private ModuleService moduleService;
-	
-	@Override
-	public void run(String... args) throws Exception {
-		final LocalDate today = LocalDate.now();
-		// 加载CTP合约
-		List.of(ExchangeEnum.CFFEX, ExchangeEnum.SHFE, ExchangeEnum.DCE, ExchangeEnum.CZCE, ExchangeEnum.INE)
-			.parallelStream()
-			.forEach(exchange -> {
-				dsMgr.getAllContracts(exchange).stream()
-					//过滤掉过期合约
-					.filter(contract -> LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
-					.forEach(contract -> mktCenter.addInstrument(new CtpContract(contract)));
-				log.info("预加载 [{}] 交易所合约信息", exchange);
-			});
-		mktCenter.loadContractGroup(ChannelType.CTP);
+    @Autowired
+    private IMarketCenter mktCenter;
 
-		// 加载币圈OKX市场合约
-		List.of(ExchangeEnum.OKX)
-				.parallelStream()
-				.forEach(exchange -> {
-					dsMgr.getW3AllContracts(exchange)
-							.forEach(contract -> mktCenter.addInstrument(new OkxContract(contract)));
-					log.info("预加载 [{}] w3交易所合约信息", exchange);
-				});
+    @Autowired
+    private GatewayDsmProvider gdp;
 
-		// 加载模拟合约
-		SimContractGenerator contractGen = new SimContractGenerator("SIM");
-		Instrument simContract = contractGen.getContract();
-		mktCenter.addInstrument(simContract);
-		
-		gatewayService.postLoad();
-		moduleService.postLoad();
-	}
+    @Autowired
+    private GatewayService gatewayService;
+
+    @Autowired
+    private ModuleService moduleService;
+
+    @Override
+    public void run(String... args) throws Exception {
+        final LocalDate today = LocalDate.now();
+        // 加载CTP合约
+        List.of(ExchangeEnum.CFFEX, ExchangeEnum.SHFE, ExchangeEnum.DCE, ExchangeEnum.CZCE, ExchangeEnum.INE)
+                .parallelStream()
+                .forEach(exchange -> {
+                    gdp.getDsmFactory(ChannelType.CTP).getAllContracts(exchange).stream()
+                            //过滤掉过期合约
+                            .filter(contract -> LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
+                            .forEach(contract -> mktCenter.addInstrument(new CtpContract(contract)));
+                    log.info("预加载 [{}] 交易所合约信息", exchange);
+                });
+        mktCenter.loadContractGroup(ChannelType.CTP);
+
+        // 加载币圈OKX市场合约
+        List.of(ExchangeEnum.OKX)
+                .parallelStream()
+                .forEach(exchange -> {
+                    gdp.getDsmFactory(ChannelType.OKX).getAllContracts(exchange)
+                            .forEach(contract -> mktCenter.addInstrument(new OkxContract(contract)));
+                    log.info("预加载 [{}] w3交易所合约信息", exchange);
+                });
+
+        // 加载模拟合约
+        SimContractGenerator contractGen = new SimContractGenerator("SIM");
+        Instrument simContract = contractGen.getContract();
+        mktCenter.addInstrument(simContract);
+
+        gatewayService.postLoad();
+        moduleService.postLoad();
+    }
 
 }
