@@ -339,7 +339,8 @@ public class PlaybackContext {
 			.filter(entry -> entry.getValue().peek().getActionTimestamp() <= currentTime)
 			.forEach(entry -> {
 				BarField bar = entry.getValue().poll();
-				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(GWID, bar.getUnifiedSymbol()).contractField());
+				// GWID 改为通过网关获取
+				TickSimulationAlgorithm algo = algoMap.get(contractMgr.getContract(gd.getGatewayId(), bar.getUnifiedSymbol()).contractField());
 				List<TickEntry> ticksOfBar = algo.generateFrom(bar);
 				cacheBarMap.put(entry.getKey(), bar);
 				contractTickMap.put(entry.getKey(), new LinkedList<>(convertTicks(ticksOfBar, bar)));
@@ -347,7 +348,7 @@ public class PlaybackContext {
 	}
 	
 	private List<TickField> convertTicks(List<TickEntry> ticks, BarField srcBar) {
-		ContractField contract = contractMgr.getContract(GWID, srcBar.getUnifiedSymbol()).contractField();
+		ContractField contract = contractMgr.getContract(gd.getGatewayId(), srcBar.getUnifiedSymbol()).contractField();
 		BarField tradeDayBar = tradeDayBarMap.get(contract, LocalDate.parse(srcBar.getTradingDay(), DateTimeConstant.D_FORMAT_INT_FORMATTER));
 		if(Objects.isNull(tradeDayBar)) {
 			return Collections.emptyList();

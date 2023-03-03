@@ -21,7 +21,7 @@ public interface IMarketDataRepository {
 	
 	/**
 	 * 加载历史行情分钟K线数据
-	 * @param gatewayId
+	 * @param channelType
 	 * @param unifiedSymbol
 	 * @param startDate
 	 * @param endDate

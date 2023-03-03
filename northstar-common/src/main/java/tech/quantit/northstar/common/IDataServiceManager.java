@@ -19,7 +19,7 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<BarField> getMinutelyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
-	
+
 	/**
 	 * 获取15分钟K线数据
 	 * @param unifiedSymbol
@@ -46,7 +46,7 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
-	
+
 	/**
 	 * 获取查询范围内的节假日（包括周末）
 	 * @param exchange
@@ -62,7 +62,7 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<ContractField> getAllContracts(ExchangeEnum exchange);
-	
+
 	/**
 	 * 获取CTP信息
 	 * @param brokerId
