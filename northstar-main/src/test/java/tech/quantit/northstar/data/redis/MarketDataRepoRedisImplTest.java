@@ -27,7 +27,7 @@ import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.IMarketDataRepository;
-import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.data.factory.GatewayDsmProvider;
 import test.common.TestFieldFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 
@@ -75,7 +75,7 @@ class MarketDataRepoRedisImplTest {
 		redisTemplate.setKeySerializer(new StringRedisSerializer(StandardCharsets.UTF_8));
 		redisTemplate.afterPropertiesSet();
 		
-		repo = new MarketDataRepoRedisImpl(redisTemplate, mock(DataServiceManager.class));
+		repo = new MarketDataRepoRedisImpl(redisTemplate, mock(GatewayDsmProvider.class));
 	}
 	
 	@AfterEach
@@ -105,8 +105,8 @@ class MarketDataRepoRedisImplTest {
 	@Test
 	void testLoadBarsPeriods0() {
 		RedisTemplate<String, byte[]> mockRedisTemplate = mock(RedisTemplate.class);
-		DataServiceManager mockDataMgr = mock(DataServiceManager.class);
-		when(mockDataMgr.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class)))
+		GatewayDsmProvider mockDataMgr = mock(GatewayDsmProvider.class);
+		when(mockDataMgr.getDsmFactory(ChannelType.CTP).getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class)))
 			.thenReturn(List.of(BarField.newBuilder()
 				.setGatewayId("CTP")
 				.setUnifiedSymbol("testSymbol")
@@ -114,7 +114,7 @@ class MarketDataRepoRedisImplTest {
 		IMarketDataRepository mdRepo = new MarketDataRepoRedisImpl(mockRedisTemplate, mockDataMgr);
 		
 		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), LocalDate.now().minusDays(1));
-		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now().minusDays(1)));
+		verify(mockDataMgr.getDsmFactory(ChannelType.CTP)).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now().minusDays(1)));
 		verify(mockRedisTemplate, times(0)).boundListOps(anyString());
 	}
 	
@@ -122,12 +122,12 @@ class MarketDataRepoRedisImplTest {
 	@Test
 	void testLoadBarsPeriods1() {
 		RedisTemplate<String, byte[]> mockRedisTemplate = mock(RedisTemplate.class);
-		DataServiceManager mockDataMgr = mock(DataServiceManager.class);
-		when(mockDataMgr.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(Collections.emptyList());
+		GatewayDsmProvider mockDataMgr = mock(GatewayDsmProvider.class);
+		when(mockDataMgr.getDsmFactory(ChannelType.CTP).getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(Collections.emptyList());
 		IMarketDataRepository mdRepo = new MarketDataRepoRedisImpl(mockRedisTemplate, mockDataMgr);
 		
 		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), LocalDate.now().minusDays(1));
-		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now().minusDays(1)));
+		verify(mockDataMgr.getDsmFactory(ChannelType.CTP)).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now().minusDays(1)));
 		verify(mockRedisTemplate, times(0)).boundListOps(anyString());
 	}
 	
@@ -135,9 +135,9 @@ class MarketDataRepoRedisImplTest {
 	@Test
 	void testLoadBarsPeriods2() {
 		RedisTemplate<String, byte[]> mockRedisTemplate = mock(RedisTemplate.class);
-		DataServiceManager mockDataMgr = mock(DataServiceManager.class);
+		GatewayDsmProvider mockDataMgr = mock(GatewayDsmProvider.class);
 		BoundListOperations<String, byte[]> list = mock(BoundListOperations.class);
-		when(mockDataMgr.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class)))
+		when(mockDataMgr.getDsmFactory(ChannelType.CTP).getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class)))
 			.thenReturn(List.of(BarField.newBuilder()
 					.setGatewayId("CTP")
 					.setUnifiedSymbol("testSymbol")
@@ -156,7 +156,7 @@ class MarketDataRepoRedisImplTest {
 			realDate = realDate.plusDays(1);
 		}
 		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), endDate);
-		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
+		verify(mockDataMgr.getDsmFactory(ChannelType.CTP)).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
 		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", realDate.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
 	
@@ -164,9 +164,9 @@ class MarketDataRepoRedisImplTest {
 	@Test
 	void testLoadBarsPeriods3() {
 		RedisTemplate<String, byte[]> mockRedisTemplate = mock(RedisTemplate.class);
-		DataServiceManager mockDataMgr = mock(DataServiceManager.class);
+		GatewayDsmProvider mockDataMgr = mock(GatewayDsmProvider.class);
 		BoundListOperations<String, byte[]> list = mock(BoundListOperations.class);
-		when(mockDataMgr.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class)))
+		when(mockDataMgr.getDsmFactory(ChannelType.CTP).getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class)))
 			.thenReturn(List.of(BarField.newBuilder()
 				.setGatewayId("CTP")
 				.setUnifiedSymbol("testSymbol")
@@ -186,7 +186,7 @@ class MarketDataRepoRedisImplTest {
 			date = date.plusDays(1);
 		}
 		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), endDate);
-		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now()));
+		verify(mockDataMgr.getDsmFactory(ChannelType.CTP)).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(LocalDate.now()));
 		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", date.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
 	
@@ -194,9 +194,9 @@ class MarketDataRepoRedisImplTest {
 	@Test
 	void testLoadBarsPeriods4() {
 		RedisTemplate<String, byte[]> mockRedisTemplate = mock(RedisTemplate.class);
-		DataServiceManager mockDataMgr = mock(DataServiceManager.class);
+		GatewayDsmProvider mockDataMgr = mock(GatewayDsmProvider.class);
 		BoundListOperations<String, byte[]> list = mock(BoundListOperations.class);
-		when(mockDataMgr.getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(Collections.emptyList());
+		when(mockDataMgr.getDsmFactory(ChannelType.CTP).getMinutelyData(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(Collections.emptyList());
 		when(mockRedisTemplate.boundListOps(anyString())).thenReturn(list);
 		when(list.size()).thenReturn(0L);
 		IMarketDataRepository mdRepo = new MarketDataRepoRedisImpl(mockRedisTemplate, mockDataMgr);
@@ -207,7 +207,7 @@ class MarketDataRepoRedisImplTest {
 		}
 		LocalDate today = LocalDate.now();
 		mdRepo.loadBars(ChannelType.CTP, "testSymbol", LocalDate.of(2022, 8, 16), endDate);
-		verify(mockDataMgr).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
+		verify(mockDataMgr.getDsmFactory(ChannelType.CTP)).getMinutelyData(eq("testSymbol"), eq(LocalDate.of(2022, 8, 16)), eq(today));
 		verify(mockRedisTemplate).boundListOps(eq(String.format("%s%s:%s:%s", KEY_PREFIX, "CTP", today.format(DateTimeConstant.D_FORMAT_INT_FORMATTER), "testSymbol")));
 	}
 	
