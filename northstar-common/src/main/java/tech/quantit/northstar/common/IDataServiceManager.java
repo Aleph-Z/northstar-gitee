@@ -46,7 +46,7 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<BarField> getDailyData(String unifiedSymbol, LocalDate startDate, LocalDate endDate);
-	
+
 	/**
 	 * 获取查询范围内的节假日（包括周末）
 	 * @param exchange
@@ -62,13 +62,6 @@ public interface IDataServiceManager {
 	 * @return
 	 */
 	List<ContractField> getAllContracts(ExchangeEnum exchange);
-
-	/**
-	 * 获取币圈合约数据
-	 * @param exchange
-	 * @return
-	 */
-	List<ContractField> getW3AllContracts(ExchangeEnum exchange);
 
 	/**
 	 * 获取CTP信息
