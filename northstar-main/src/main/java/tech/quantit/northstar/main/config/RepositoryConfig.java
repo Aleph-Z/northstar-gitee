@@ -1,16 +1,21 @@
 package tech.quantit.northstar.main.config;
 
 import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestTemplate;
 
+import tech.quantit.northstar.common.IDataServiceManager;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMailConfigRepository;
@@ -19,6 +24,8 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.data.ds.OKXDataServiceManager;
+import tech.quantit.northstar.data.ds.factory.DataManagerFactory;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MailConfigRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
@@ -51,16 +58,25 @@ public class RepositoryConfig {
 	
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;
-	
+	@Value("${northstar.data-service.w3BaseUrl}")
+	private String w3BaseUrl;
+
 	@Bean
+	@Primary
 	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
 		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
 		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
 	}
-	
+
 	@Bean
-	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
-		return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
+	public OKXDataServiceManager okxDataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
+		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
+		return new OKXDataServiceManager(w3BaseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
+	}
+
+	@Bean
+	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataManagerFactory dmf) {
+		return new MarketDataRepoRedisImpl(redisTemplate, dmf);
 	}
 	
 	@Bean
@@ -77,4 +93,13 @@ public class RepositoryConfig {
 	public IMailConfigRepository mailConfigRepository(RedisTemplate<String, byte[]> redisTemplate) {
 		return new MailConfigRepoRedisImpl(redisTemplate);
 	}
+
+	@Bean
+	public DataManagerFactory DataManagerFactoryRepository(DataServiceManager dataServiceManager, OKXDataServiceManager okxDataServiceManager){
+		Map<ChannelType, IDataServiceManager> dmfMap = new EnumMap<>(ChannelType.class);
+		dmfMap.put(ChannelType.CTP,dataServiceManager);
+		dmfMap.put(ChannelType.OKX,okxDataServiceManager);
+		return new DataManagerFactory(dmfMap);
+	}
+
 }

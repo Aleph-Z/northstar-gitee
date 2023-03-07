@@ -12,9 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
 import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.data.ds.factory.DataManagerFactory;
 import tech.quantit.northstar.gateway.api.IMarketCenter;
 import tech.quantit.northstar.gateway.api.domain.contract.Instrument;
 import tech.quantit.northstar.gateway.ctp.CtpContract;
+import tech.quantit.northstar.gateway.okx.OkxContract;
 import tech.quantit.northstar.gateway.sim.trade.SimContractGenerator;
 import tech.quantit.northstar.main.service.GatewayService;
 import tech.quantit.northstar.main.service.ModuleService;
@@ -27,9 +29,9 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 
 	@Autowired
 	private IMarketCenter mktCenter;
-	
+
 	@Autowired
-	private DataServiceManager dsMgr;
+	private DataManagerFactory dmf;
 	
 	@Autowired
 	private GatewayService gatewayService;
@@ -44,14 +46,23 @@ public class ContractsDefaultLoader implements CommandLineRunner{
 		List.of(ExchangeEnum.CFFEX, ExchangeEnum.SHFE, ExchangeEnum.DCE, ExchangeEnum.CZCE, ExchangeEnum.INE)
 			.parallelStream()
 			.forEach(exchange -> {
-				dsMgr.getAllContracts(exchange).stream()
+				dmf.getDm(ChannelType.CTP).getAllContracts(exchange).stream()
 					//过滤掉过期合约
 					.filter(contract -> LocalDate.parse(contract.getLastTradeDateOrContractMonth(), DateTimeConstant.D_FORMAT_INT_FORMATTER).isAfter(today))
 					.forEach(contract -> mktCenter.addInstrument(new CtpContract(contract)));
 				log.info("预加载 [{}] 交易所合约信息", exchange);
 			});
 		mktCenter.loadContractGroup(ChannelType.CTP);
-		
+
+		// 加载币圈OKX市场合约
+		List.of(ExchangeEnum.OKX)
+				.parallelStream()
+				.forEach(exchange -> {
+					dmf.getDm(ChannelType.OKX).getAllContracts(exchange)
+							.forEach(contract -> mktCenter.addInstrument(new OkxContract(contract)));
+					log.info("预加载 [{}] w3交易所合约信息", exchange);
+				});
+
 		// 加载模拟合约
 		SimContractGenerator contractGen = new SimContractGenerator("SIM");
 		Instrument simContract = contractGen.getContract();
