@@ -15,16 +15,16 @@ import java.util.Map;
 public class DataManagerFactory {
 
     /* gatewayType -> dataServiceManager */
-	private  Map<ChannelType, IDataServiceManager> dmFactoryMap;
+	private  Map<ChannelType, IDataServiceManager> dmfMap;
 
-	public DataManagerFactory(Map<ChannelType, IDataServiceManager> dmFactoryMap) {
-		this.dmFactoryMap = dmFactoryMap;
+	public DataManagerFactory(Map<ChannelType, IDataServiceManager> dmfMap) {
+		this.dmfMap = dmfMap;
 	}
 
-	public IDataServiceManager getDsmFactory(ChannelType gatewayType) {
-		if(!dmFactoryMap.containsKey(gatewayType)) {
+	public IDataServiceManager getDm(ChannelType gatewayType) {
+		if(!dmfMap.containsKey(gatewayType)) {
 			throw new IllegalStateException("不存在该网关类型：" + gatewayType);
 		}
-		return dmFactoryMap.get(gatewayType);
+		return dmfMap.get(gatewayType);
 	}
 }

@@ -17,8 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.common.constant.DateTimeConstant;
-import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.data.ds.MarketDataRepoDataServiceImpl;
+import tech.quantit.northstar.data.ds.factory.DataManagerFactory;
 import xyz.redtorch.pb.CoreField.BarField;
 
 /**
@@ -33,11 +33,10 @@ public class MarketDataRepoRedisImpl extends MarketDataRepoDataServiceImpl {
 	
 	private static final String KEY_PREFIX = Constants.APP_NAME + "BarData:";
 	
-	public MarketDataRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
-		super(dsMgr);
+	public MarketDataRepoRedisImpl(RedisTemplate<String, byte[]> redisTemplate, DataManagerFactory dmf) {
+		super(dmf);
 		this.redisTemplate = redisTemplate;
 	}
-	
 	/**
 	 * redis的数据保存结构
 	 * key -> list

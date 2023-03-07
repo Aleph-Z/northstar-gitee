@@ -75,8 +75,8 @@ public class RepositoryConfig {
 	}
 
 	@Bean
-	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
-		return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
+	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataManagerFactory dmf) {
+		return new MarketDataRepoRedisImpl(redisTemplate, dmf);
 	}
 	
 	@Bean
@@ -96,10 +96,10 @@ public class RepositoryConfig {
 
 	@Bean
 	public DataManagerFactory DataManagerFactoryRepository(DataServiceManager dataServiceManager, OKXDataServiceManager okxDataServiceManager){
-		Map<ChannelType, IDataServiceManager> dmFactoryMap = new EnumMap<>(ChannelType.class);
-		dmFactoryMap.put(ChannelType.CTP,dataServiceManager);
-		dmFactoryMap.put(ChannelType.OKX,okxDataServiceManager);
-		return new DataManagerFactory(dmFactoryMap);
+		Map<ChannelType, IDataServiceManager> dmfMap = new EnumMap<>(ChannelType.class);
+		dmfMap.put(ChannelType.CTP,dataServiceManager);
+		dmfMap.put(ChannelType.OKX,okxDataServiceManager);
+		return new DataManagerFactory(dmfMap);
 	}
 
 }
