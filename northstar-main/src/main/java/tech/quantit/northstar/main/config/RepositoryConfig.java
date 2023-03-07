@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -56,9 +57,16 @@ public class RepositoryConfig {
 	private String w3BaseUrl;
 
 	@Bean
+	@Primary
 	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
 		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
 		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
+	}
+
+	@Bean
+	public OKXDataServiceManager okxDataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
+		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
+		return new OKXDataServiceManager(w3BaseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
 	}
 
 	@Bean
