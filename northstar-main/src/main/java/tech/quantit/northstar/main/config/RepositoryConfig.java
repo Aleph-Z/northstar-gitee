@@ -101,5 +101,5 @@ public class RepositoryConfig {
 		dmFactoryMap.put(ChannelType.OKX,okxDataServiceManager);
 		return new DataManagerFactory(dmFactoryMap);
 	}
-	
+
 }
