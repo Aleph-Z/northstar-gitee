@@ -1,6 +1,8 @@
 package tech.quantit.northstar.main.config;
 
 import java.nio.charset.StandardCharsets;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.client.RestTemplate;
 
+import tech.quantit.northstar.common.IDataServiceManager;
+import tech.quantit.northstar.common.constant.ChannelType;
 import tech.quantit.northstar.common.constant.Constants;
 import tech.quantit.northstar.data.IGatewayRepository;
 import tech.quantit.northstar.data.IMailConfigRepository;
@@ -21,6 +25,7 @@ import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
 import tech.quantit.northstar.data.ds.OKXDataServiceManager;
+import tech.quantit.northstar.data.ds.factory.DataManagerFactory;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MailConfigRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
@@ -88,4 +93,13 @@ public class RepositoryConfig {
 	public IMailConfigRepository mailConfigRepository(RedisTemplate<String, byte[]> redisTemplate) {
 		return new MailConfigRepoRedisImpl(redisTemplate);
 	}
+
+	@Bean
+	public DataManagerFactory DataManagerFactoryRepository(DataServiceManager dataServiceManager, OKXDataServiceManager okxDataServiceManager){
+		Map<ChannelType, IDataServiceManager> dmFactoryMap = new EnumMap<>(ChannelType.class);
+		dmFactoryMap.put(ChannelType.CTP,dataServiceManager);
+		dmFactoryMap.put(ChannelType.OKX,okxDataServiceManager);
+		return new DataManagerFactory(dmFactoryMap);
+	}
+	
 }
