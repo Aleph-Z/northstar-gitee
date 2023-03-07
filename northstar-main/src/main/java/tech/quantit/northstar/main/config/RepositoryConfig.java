@@ -19,6 +19,7 @@ import tech.quantit.northstar.data.IModuleRepository;
 import tech.quantit.northstar.data.IPlaybackRuntimeRepository;
 import tech.quantit.northstar.data.ISimAccountRepository;
 import tech.quantit.northstar.data.ds.DataServiceManager;
+import tech.quantit.northstar.data.ds.OKXDataServiceManager;
 import tech.quantit.northstar.data.redis.GatewayRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MailConfigRepoRedisImpl;
 import tech.quantit.northstar.data.redis.MarketDataRepoRedisImpl;
@@ -51,13 +52,15 @@ public class RepositoryConfig {
 	
 	@Value("${northstar.data-service.baseUrl}")
 	private String baseUrl;
-	
+	@Value("${northstar.data-service.w3BaseUrl}")
+	private String w3BaseUrl;
+
 	@Bean
 	public DataServiceManager dataServiceManager(RedisTemplate<String, byte[]> redisTemplate, RestTemplate restTemplate, IContractManager contractMgr) {
 		String nsdsSecret = Optional.ofNullable(System.getenv(Constants.NS_DS_SECRET)).orElse("");
 		return new DataServiceManager(baseUrl, nsdsSecret, restTemplate, new CtpDateTimeUtil(), contractMgr);
 	}
-	
+
 	@Bean
 	public IMarketDataRepository marketDataRepository(RedisTemplate<String, byte[]> redisTemplate, DataServiceManager dsMgr) {
 		return new MarketDataRepoRedisImpl(redisTemplate, dsMgr);
