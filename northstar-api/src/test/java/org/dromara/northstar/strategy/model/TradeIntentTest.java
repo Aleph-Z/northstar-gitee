@@ -41,7 +41,7 @@ class TradeIntentTest {
 	void prepare() {
 		when(ctx.submitOrderReq(any(ContractField.class), any(SignalOperation.class), any(PriceType.class), anyInt(), any(Double.class)))
 			.thenReturn(Optional.of(ORDER_ID));
-		when(ctx.getState()).thenReturn(ModuleState.EMPTY, ModuleState.PLACING_ORDER, ModuleState.EMPTY);
+		when(ctx.getState()).thenReturn(ModuleState.EMPTY);
 		when(ctx.getLogger()).thenReturn(mock(Logger.class));
 	}
 
