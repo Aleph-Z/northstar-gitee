@@ -557,7 +557,6 @@ public class ModuleContext implements IModuleContext{
 				.setGatewayId(contract.getGatewayId())
 				.setOriginOrderId(originOrderId)
 				.build();
-		moduleAccount.onCancelOrder();
 		module.getAccount(c).cancelOrder(cancelReq);
 	}
 

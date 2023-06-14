@@ -101,17 +101,6 @@ public class ModuleStateMachine implements TransactionAware {
 		setState(ModuleState.PLACING_ORDER);
 	}
 
-	public void onCancelReq() {
-		if(!curState.isOrdering()) {
-			throw new IllegalStateException(String.format("当前状态：%s，不能继续撤单", curState));
-		}
-		if(curState == ModuleState.PENDING_ORDER) {
-			setState(ModuleState.RETRIEVING_FOR_CANCEL);
-		} else if (curState == ModuleState.PLACING_ORDER) {
-			setState(prevState);
-		}
-	}
-	
 	public void setModuleAccount(ModuleAccount moduleAccount) {
 		this.moduleAccount = moduleAccount;
 		updateState();
