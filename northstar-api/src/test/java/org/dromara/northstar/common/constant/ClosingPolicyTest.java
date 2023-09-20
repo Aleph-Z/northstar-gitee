@@ -3,6 +3,7 @@ package org.dromara.northstar.common.constant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.dromara.northstar.common.exception.TradeException;
 import org.dromara.northstar.common.model.Tuple;
 import org.junit.jupiter.api.Test;
 
@@ -70,7 +71,7 @@ class ClosingPolicyTest {
     
     @Test
     void testFirstInFirstOutException() {
-        assertThrows(IllegalStateException.class, () -> {
+        assertThrows(TradeException.class, () -> {
         	ClosingPolicy.FIRST_IN_FIRST_OUT.resolve(SignalOperation.SELL_CLOSE, pos0, 3);
         });
     }
