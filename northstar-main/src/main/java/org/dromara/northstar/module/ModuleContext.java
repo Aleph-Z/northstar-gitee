@@ -202,7 +202,7 @@ public class ModuleContext implements IModuleContext{
 			return;
 		}
 		getLogger().info("收到下单意图：{}", tradeIntent);
-		tradeIntentMap.put(tradingDay, tradeIntent);
+		tradeIntentMap.put(tradeIntent.getContract().getUnifiedSymbol(), tradeIntent);
 		tradeIntent.setContext(this);
         tradeIntent.onTick(tick);
 	}
