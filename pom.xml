@@ -44,10 +44,11 @@
 
 	<modules>
 		<module>northstar-external-archetype</module>
-		<module>northstar-monitor</module>
+<!--		<module>northstar-monitor</module>-->
 		<module>northstar-api</module>
 		<module>northstar-gateway-sim</module>
 		<module>northstar-gateway-playback</module>
+		<module>northstar-gateway-tiger</module>
 		<module>northstar-rl</module>
 		<module>northstar-strategy-example</module>
 		<module>northstar-main</module>
@@ -92,6 +93,11 @@
 			<dependency>
 				<groupId>org.dromara</groupId>
 				<artifactId>northstar-gateway-playback</artifactId>
+				<version>${northstar-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.dromara</groupId>
+				<artifactId>northstar-gateway-tiger</artifactId>
 				<version>${northstar-version}</version>
 			</dependency>
 			<dependency>
