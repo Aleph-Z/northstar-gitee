@@ -22,7 +22,6 @@ import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import com.lmax.disruptor.util.DaemonThreadFactory;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.redtorch.pb.CoreEnum.CommonStatusEnum;
@@ -71,7 +70,7 @@ public class DisruptorFastEventEngine implements FastEventEngine, DisposableBean
 	
 	public DisruptorFastEventEngine(WaitStrategyEnum strategy) throws Exception {
 		WaitStrategy s = (WaitStrategy) strategy.getStrategyClass().getDeclaredConstructor().newInstance();
-		disruptor = new Disruptor<>(new NorthstarEventFactory(), BUF_SIZE, DaemonThreadFactory.INSTANCE,
+		disruptor = new Disruptor<>(new NorthstarEventFactory(), BUF_SIZE, Thread.ofVirtual().factory(),
 				ProducerType.MULTI, s);
 		ringBuffer = disruptor.start();
 		log.info("启动事件引擎");
