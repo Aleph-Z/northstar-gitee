@@ -3,7 +3,7 @@
 set -e
 
 echo "准备环境依赖..."
-yum install git wget -y
+sudo apt install git wget -y
 
 mkdir -p ~/northstar-env ~/northstar-dist
 
